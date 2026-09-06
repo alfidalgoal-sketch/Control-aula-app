@@ -85,7 +85,7 @@
           </div>
           <div>
             <h1 id="main-title" class="font-display text-xl font-bold text-white leading-tight">ControlAula v.25</h1>
-            <p id="student-display" class="text-sm" style="color: rgba(255,255,255,0.8);">Docente: <span id="user-email-tag" class="font-semibold text-white"></span></p>
+            <p id="student-display" class="text-sm" style="color: rgba(255,255,255,0.8);">Docente: <span id="user-email-tag" class="font-semibold text-white"></span> <span id="admin-badge" class="hidden ml-1 px-2 py-0.5 text-xs bg-amber-400 text-amber-950 font-bold rounded-full">Orientación (Admin)</span></p>
           </div>
         </div>
         <button onclick="logout()" class="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition" title="Pechar sesión">
@@ -248,23 +248,23 @@
       </div>
     </div>
 
-    <!-- History Tab (Agrupado por Alumno) -->
+    <!-- History Tab (Filtrado por usuario / Admin global) -->
     <div id="view-history" class="px-4 py-5 hidden">
       <div class="max-w-2xl mx-auto">
         <div id="history-empty" class="text-center py-12 hidden">
           <div class="text-5xl mb-3">📋</div>
-          <p class="font-semibold" style="color:#2d6a4f;">Sen rexistros aínda</p>
+          <p class="font-semibold" style="color:#2d6a4f;">Sen rexistros autorizados para amosar</p>
         </div>
         <div id="student-summary-list" class="space-y-4"></div>
       </div>
     </div>
 
-    <!-- Stats / Módulo Informe Semanal Reeditable -->
+    <!-- Stats / Módulo Informe Semanal Reeditable e Personalizado -->
     <div id="view-stats" class="px-4 py-5 hidden">
       <div class="max-w-2xl mx-auto space-y-4">
         <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <h3 class="font-display font-bold text-lg mb-2" style="color:#2d6a4f;">📄 Xenerador de Informe Semanal Reeditable</h3>
-          <p class="text-xs text-gray-600 mb-4">Selecciona o alumno para xerar o borrador. Poderás editar calquera texto antes de copialo.</p>
+          <h3 class="font-display font-bold text-lg mb-2" style="color:#2d6a4f;">📄 Xenerador de Informe Semanal Adaptado</h3>
+          <p class="text-xs text-gray-600 mb-4">Selecciona o alumno para xerar un borrador único e reeditábel antes do envío.</p>
 
           <div class="mb-4">
             <label class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Alumno/a e Curso</label>
@@ -272,7 +272,7 @@
           </div>
 
           <button onclick="generateWeeklyReport()" class="w-full py-3 rounded-xl text-white font-semibold text-sm flex justify-center items-center gap-2" style="background: linear-gradient(135deg, #2d6a4f, #40916c);">
-            <i data-lucide="sparkles" style="width:16px;height:16px;"></i> Xerar Borrador do Informe
+            <i data-lucide="sparkles" style="width:16px;height:16px;"></i> Xerar Borrador Personalizado
           </button>
         </div>
 
@@ -294,7 +294,7 @@
           </div>
 
           <div id="block-behaviors" class="hidden">
-            <label class="block text-xs font-semibold text-gray-700 mb-1">🎯 Condutas Observadas (Orde Cronolóxica Descendente):</label>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">🎯 Condutas Observadas (Cronolóxico Descendente):</label>
             <textarea id="edit-behaviors" rows="4" class="w-full rounded-xl border p-3 text-sm" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
           </div>
 
@@ -320,10 +320,11 @@
 
   <script>
     // -------------------------------------------------------------
-    // CONFIGURACIÓN DE SUPABASE
+    // CONFIGURACIÓN DE SUPABASE E ROL DE ADMINISTRADORA
     // -------------------------------------------------------------
     const SUPABASE_URL = "https://gnzqvwmwvsfjjwvzqcjy.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImduenF2d213dnNmamp3dnpxY2p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3Mjc5MjksImV4cCI6MjA5MTMwMzkyOX0.VVY85EnMX5rILMiPJcxhUI537ZFfT1ppu1zAhFGtqgE";
+    const ADMIN_EMAIL = "alfidalgo.al@gmail.com";
     
     let _supabase;
     if (window.supabase) {
@@ -332,6 +333,8 @@
 
     const RECORDS_KEY = "controlaula_records_local";
     let allRecords = [];
+    let currentUser = null;
+    let isAdmin = false;
     let selectedMood = '';
     let toggles = { participated: false, rules: false, support: false, strategyWorked: false };
     let selectedBehaviors = new Set();
@@ -343,10 +346,20 @@
       try {
         const { data: { session } } = await _supabase.auth.getSession();
         if (session && session.user) {
+          currentUser = session.user;
+          isAdmin = currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
           document.getElementById("auth-gate").style.display = "none";
           document.getElementById("app").classList.remove("hidden");
-          document.getElementById("user-email-tag").textContent = session.user.email;
-          document.getElementById("inp-teacher").value = session.user.email.split('@')[0];
+          document.getElementById("user-email-tag").textContent = currentUser.email;
+          document.getElementById("inp-teacher").value = currentUser.email.split('@')[0];
+
+          if (isAdmin) {
+            document.getElementById("admin-badge").classList.remove("hidden");
+          } else {
+            document.getElementById("admin-badge").classList.add("hidden");
+          }
+
           loadLocalData();
         } else {
           document.getElementById("auth-gate").style.display = "flex";
@@ -400,13 +413,38 @@
     }
 
     function loadLocalData() {
-      try { allRecords = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]"); } catch { allRecords = []; }
+      try { 
+        const raw = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
+        // Filtro de seguridade: Ti (Admin) ves todo. O resto de usuarios ven só os seus rexistros.
+        if (isAdmin) {
+          allRecords = raw;
+        } else if (currentUser) {
+          allRecords = raw.filter(r => r.user_email === currentUser.email);
+        } else {
+          allRecords = [];
+        }
+      } catch { 
+        allRecords = []; 
+      }
       renderHistoryGrouped();
       populateStudentSelect();
     }
 
     function saveLocalData() {
-      localStorage.setItem(RECORDS_KEY, JSON.stringify(allRecords));
+      // Cargamos todo o historial almacenado e actualizamos a nosa parte
+      try {
+        let globalData = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
+        if (isAdmin) {
+          globalData = allRecords;
+        } else {
+          // Mantemos os rexistros doutros usuarios e substituímos os do usuario actual
+          const others = globalData.filter(r => r.user_email !== currentUser.email);
+          globalData = [...allRecords, ...others];
+        }
+        localStorage.setItem(RECORDS_KEY, JSON.stringify(globalData));
+      } catch {
+        localStorage.setItem(RECORDS_KEY, JSON.stringify(allRecords));
+      }
       renderHistoryGrouped();
       populateStudentSelect();
     }
@@ -433,20 +471,12 @@
       const date = document.getElementById('inp-date').value;
       if (!date) { showToast('Selecciona unha data'); return; }
 
-      let userEmail = 'docente';
-      if (_supabase) {
-        const sessionRes = await _supabase.auth.getSession();
-        if (sessionRes.data && sessionRes.data.session) {
-          userEmail = sessionRes.data.session.user.email;
-        }
-      }
-
       const fullStudentTag = `${initials} (${course})`;
 
       const record = {
         id: Date.now().toString(),
         timestamp: new Date().toISOString(),
-        user_email: userEmail,
+        user_email: currentUser ? currentUser.email : 'docente',
         date: date,
         student_initials: fullStudentTag,
         teacher_name: document.getElementById('inp-teacher').value.trim(),
@@ -530,7 +560,7 @@
               ${studentRecords.map(rec => `
                 <div class="bg-white p-3 rounded-xl border border-gray-200 text-xs space-y-1">
                   <div class="flex items-center justify-between">
-                    <span class="font-bold text-gray-700">${rec.date} · Docente: ${rec.teacher_name}</span>
+                    <span class="font-bold text-gray-700">${rec.date} · Docente: ${rec.teacher_name} (${rec.user_email})</span>
                     <button onclick="deleteRecord('${rec.id}')" class="text-red-500 hover:text-red-700 font-semibold">Eliminar</button>
                   </div>
                   <p><strong>Estado emocional:</strong> ${moodMap[rec.mood] || 'N/A'} · <strong>Enerxía:</strong> ${rec.energy_level}/5</p>
@@ -572,12 +602,11 @@
       select.innerHTML = students.map(s => `<option value="${s}">${s}</option>`).join('');
     }
 
-    // GENERADOR DE INFORME SEMANAL REEDITABLE (ORDE CRONOLÓXICA DESCENDENTE + OCULTA BALÍOS)
+    // INFORME DINÁMICO ADAPTADO
     function generateWeeklyReport() {
       const student = document.getElementById('report-student').value;
       if (!student) { showToast('Selecciona un alumno/a'); return; }
 
-      // Filtrar rexistros do alumno e ordea-los cronoloxicamente descendente (os máis recentes primeiro)
       const studentRecords = allRecords
         .filter(r => r.student_initials === student)
         .sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -587,32 +616,35 @@
       const total = studentRecords.length;
       const energyAvg = (studentRecords.reduce((a, b) => a + b.energy_level, 0) / total).toFixed(1);
 
-      // Recoller condutas con data
       const behaviorLines = [];
       studentRecords.forEach(r => {
         if (r.behaviors) {
-          behaviorLines.push(`• [Data: ${r.date}] ${r.behaviors}`);
+          behaviorLines.push(`• [${r.date}] ${r.behaviors}`);
         }
       });
 
-      // Recoller momentos positivos con data
       const positiveLines = [];
       studentRecords.forEach(r => {
         if (r.positive_moment) {
-          positiveLines.push(`• [Data: ${r.date}] ${r.positive_moment}`);
+          positiveLines.push(`• [${r.date}] ${r.positive_moment}`);
         }
       });
 
-      // Recoller observacións con data
       const observationLines = [];
       studentRecords.forEach(r => {
         if (r.observation) {
-          observationLines.push(`• [Data: ${r.date}] ${r.observation}`);
+          observationLines.push(`• [${r.date}] ${r.observation}`);
         }
       });
 
-      // Rellenar encabezado
-      document.getElementById('edit-header').value = `Estimada familia,\n\nPresentamos o resumo do seguimento pedagóxico do alumno/a ${student}, elaborado no marco do modelo inclusivo e de atención á diversidade da Consellería de Educación.\n\n📊 Resumo xeral de sesións: ${total} | Nivel medio de enerxía e disposición: ${energyAvg}/5.`;
+      // Saúdos dinámicos
+      const greetings = [
+        `Estimada familia,\n\nCompartimos o informe pedagóxico do seguimento de ${student}, elaborado no cadro do modelo inclusivo da Consellería de Educación.\n\n📊 Sesións analizadas: ${total} | Nivel medio de disposición: ${energyAvg}/5.`,
+        `Apreciada familia,\n\nA continuación remitimos o resumo de evolución e convivencia correspondente a ${student}.\n\n📊 Total de sesións rexistradas: ${total} | Disposición e enerxía media: ${energyAvg}/5.`
+      ];
+      const selectedGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+
+      document.getElementById('edit-header').value = selectedGreeting;
 
       // Bloque Condutas
       const bBlock = document.getElementById('block-behaviors');
@@ -641,11 +673,10 @@
         oBlock.classList.add('hidden');
       }
 
-      // Rellenar peche
-      document.getElementById('edit-footer').value = `🤝 Orientacións para a colaboración coa familia:\nContinuamos traballando na aula o reforzo positivo e a autorregulación emocional. Agradecemos o voso apoio continuo dende o fogar para manter unha liña de intervención coherente e favorecedora do seu desenvolvemento pedagóxico e benestar integral.\n\nAtentamente,\nO equipo docente.`;
+      document.getElementById('edit-footer').value = `🤝 Orientacións para a colaboración familia-escola:\nContinuamos traballando na aula o reforzo positivo e a autorregulación emocional. Agradecemos o voso apoio continuo para manter unha liña de intervención coherente e favorecedora do seu benestar integral.\n\nAtentamente,\nO equipo docente.`;
 
       document.getElementById('report-title').textContent = `Informe Semanal - ${student}`;
-      document.getElementById('report-subtitle').textContent = `Xerado o: ${new Date().toLocaleDateString('gl-ES')} (Orde cronolóxica descendente)`;
+      document.getElementById('report-subtitle').textContent = `Xerado o: ${new Date().toLocaleDateString('gl-ES')}`;
       document.getElementById('report-output-card').classList.remove('hidden');
     }
 
