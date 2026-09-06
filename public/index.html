@@ -112,14 +112,40 @@
     <div id="view-form" class="px-4 py-5 fade-in">
       <div class="max-w-2xl mx-auto space-y-4">
         <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
               <label for="inp-date" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">📅 Data</label>
               <input type="date" id="inp-date" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
             </div>
             <div>
-              <label for="inp-initials" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Iniciais do alumno/a</label>
-              <input type="text" id="inp-initials" placeholder="ex. JMG" maxlength="3" class="w-full rounded-xl border px-3 py-2.5 text-sm uppercase" style="border-color:#d0ddd2; background:#f7faf8;">
+              <label for="inp-initials" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Iniciais alumno/a</label>
+              <input type="text" id="inp-initials" placeholder="ex. JM" maxlength="4" class="w-full rounded-xl border px-3 py-2.5 text-sm uppercase" style="border-color:#d0ddd2; background:#f7faf8;">
+            </div>
+            <div>
+              <label for="inp-course" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">📚 Curso</label>
+              <select id="inp-course" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
+                <option value="">Curso...</option>
+                <optgroup label="Educación Infantil">
+                  <option value="4º EI">4º EI</option>
+                  <option value="5º EI">5º EI</option>
+                  <option value="6º EI">6º EI</option>
+                </optgroup>
+                <optgroup label="Educación Primaria">
+                  <option value="1ºA EP">1ºA EP</option>
+                  <option value="1ºB EP">1ºB EP</option>
+                  <option value="2ºA EP">2ºA EP</option>
+                  <option value="2ºB EP">2ºB EP</option>
+                  <option value="3ºA EP">3ºA EP</option>
+                  <option value="3ºB EP">3ºB EP</option>
+                  <option value="4ºA EP">4ºA EP</option>
+                  <option value="4ºB EP">4ºB EP</option>
+                  <option value="5ºA EP">5ºA EP</option>
+                  <option value="5ºB EP">5ºB EP</option>
+                  <option value="6ºA EP">6ºA EP</option>
+                  <option value="6ºB EP">6ºB EP</option>
+                  <option value="6ºC EP">6ºC EP</option>
+                </optgroup>
+              </select>
             </div>
             <div>
               <label for="inp-teacher" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">👩‍🏫 Docente</label>
@@ -222,7 +248,7 @@
       </div>
     </div>
 
-    <!-- History Tab (Agrupado por Alumno) -->
+    <!-- History Tab (Agrupado por Alumno + Curso) -->
     <div id="view-history" class="px-4 py-5 hidden">
       <div class="max-w-2xl mx-auto">
         <div id="history-empty" class="text-center py-12 hidden">
@@ -252,7 +278,7 @@
           </div>
 
           <button onclick="generateWeeklyReport()" class="w-full py-3 rounded-xl text-white font-semibold text-sm flex justify-center items-center gap-2" style="background: linear-gradient(135deg, #2d6a4f, #40916c);">
-            <i data-lucide="sparkles" style="width:16px;height:16px;"></i> Generar Resumo Inclusivo
+            <i data-lucide="sparkles" style="width:16px;height:16px;"></i> Xerar Resumo Inclusivo
           </button>
         </div>
 
@@ -377,6 +403,11 @@
     }
 
     async function submitRecord() {
+      const initials = document.getElementById('inp-initials').value.trim().toUpperCase();
+      const course = document.getElementById('inp-course').value;
+      
+      if (!initials) { showToast('Introduce as iniciais do alumno/a'); return; }
+      if (!course) { showToast('Selecciona o curso'); return; }
       if (!selectedMood) { showToast('Selecciona un estado emocional'); return; }
       const date = document.getElementById('inp-date').value;
       if (!date) { showToast('Selecciona unha data'); return; }
@@ -389,11 +420,14 @@
         }
       }
 
+      // Identificador combinado: ex. "JM (4ºB EP)"
+      const fullStudentTag = `${initials} (${course})`;
+
       const record = {
         id: Date.now().toString(),
         user_email: userEmail,
         date: date,
-        student_initials: document.getElementById('inp-initials').value.trim().toUpperCase() || 'ALU',
+        student_initials: fullStudentTag,
         teacher_name: document.getElementById('inp-teacher').value.trim(),
         mood: selectedMood,
         energy_level: parseInt(document.getElementById('inp-energy').value),
@@ -418,6 +452,8 @@
       selectedBehaviors.clear();
       document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
       document.querySelectorAll('.behavior-check').forEach(cb => cb.checked = false);
+      document.getElementById('inp-initials').value = '';
+      document.getElementById('inp-course').value = '';
       document.getElementById('inp-energy').value = 3;
       document.getElementById('energy-val').textContent = '3';
       document.getElementById('inp-strategy').value = '';
@@ -429,7 +465,7 @@
 
     function showToast(msg) { const toast = document.getElementById('toast'); document.getElementById('toast-text').textContent = msg; toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 3000); }
 
-    // RENDERIZADO DO HISTORIAL AGRUPADO POR ALUMNO
+    // RENDERIZADO DO HISTORIAL AGRUPADO POR ALUMNO + CURSO
     function renderHistoryGrouped() {
       const container = document.getElementById('student-summary-list');
       const empty = document.getElementById('history-empty');
@@ -441,7 +477,7 @@
       }
       empty.classList.add('hidden');
 
-      // Agrupar por iniciais de alumno
+      // Agrupar por etiquetado único (Iniciais + Curso)
       const grouped = {};
       allRecords.forEach(rec => {
         const key = rec.student_initials || 'ALU';
@@ -450,27 +486,28 @@
       });
 
       let html = '';
-      Object.keys(grouped).forEach(student => {
-        const studentRecords = grouped[student];
+      Object.keys(grouped).forEach(studentKey => {
+        const studentRecords = grouped[studentKey];
         const lastRec = studentRecords[0]; // O máis recente
+        const safeId = studentKey.replace(/[^a-zA-Z0-9]/g, '_'); // ID limpa para o DOM
 
         html += `
           <div class="rounded-2xl bg-white border border-emerald-200 overflow-hidden shadow-sm">
-            <div onclick="toggleStudentHistory('${student}')" class="p-4 cursor-pointer hover:bg-emerald-50/50 flex items-center justify-between transition">
+            <div onclick="toggleStudentHistory('${safeId}')" class="p-4 cursor-pointer hover:bg-emerald-50/50 flex items-center justify-between transition">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-800 text-white font-bold flex items-center justify-center text-sm">
-                  ${student}
+                <div class="w-12 h-12 rounded-xl bg-emerald-800 text-white font-bold flex items-center justify-center text-xs text-center p-1 leading-tight">
+                  ${studentKey}
                 </div>
                 <div>
-                  <p class="font-bold text-gray-800 text-sm">Alumno/a: ${student} <span class="ml-2 text-xs font-normal text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">${studentRecords.length} rexistros</span></p>
+                  <p class="font-bold text-gray-800 text-sm">${studentKey} <span class="ml-2 text-xs font-normal text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">${studentRecords.length} rexistros</span></p>
                   <p class="text-xs text-gray-500">Última entrada: <strong>${lastRec.date}</strong> · ${moodEmoji[lastRec.mood] || '😐'} Enerxía: ${lastRec.energy_level}/5</p>
                 </div>
               </div>
-              <i data-lucide="chevron-down" id="icon-${student}" class="w-5 h-5 text-emerald-800 transition-transform"></i>
+              <i data-lucide="chevron-down" id="icon-${safeId}" class="w-5 h-5 text-emerald-800 transition-transform"></i>
             </div>
 
-            <div id="details-${student}" class="hidden border-t border-gray-100 bg-gray-50/50 p-4 space-y-3">
-              <p class="text-xs font-semibold text-emerald-800 uppercase tracking-wider mb-2">Historial Completo do Alumno</p>
+            <div id="details-${safeId}" class="hidden border-t border-gray-100 bg-gray-50/50 p-4 space-y-3">
+              <p class="text-xs font-semibold text-emerald-800 uppercase tracking-wider mb-2">Historial Completo do Alumno/a</p>
               ${studentRecords.map(rec => `
                 <div class="bg-white p-3 rounded-xl border border-gray-200 text-xs space-y-1">
                   <div class="flex items-center justify-between">
@@ -491,9 +528,9 @@
       lucide.createIcons();
     }
 
-    function toggleStudentHistory(student) {
-      const el = document.getElementById(`details-${student}`);
-      const icon = document.getElementById(`icon-${student}`);
+    function toggleStudentHistory(safeId) {
+      const el = document.getElementById(`details-${safeId}`);
+      const icon = document.getElementById(`icon-${safeId}`);
       if (el.classList.contains('hidden')) {
         el.classList.remove('hidden');
         icon.style.transform = 'rotate(180deg)';
@@ -529,7 +566,7 @@
       const positiveMoments = studentRecords.map(r => r.positive_moment).filter(Boolean);
       const observations = studentRecords.map(r => r.observation).filter(Boolean);
 
-      let text = `Estimada familia,\n\nPresentamos o resumo do seguimento pedagóxico semanal do alumno/a coas iniciais **${student}**, elaborado no marco do modelo inclusivo e de atención á diversidade da Consellería de Educación.\n\n`;
+      let text = `Estimada familia,\n\nPresentamos o resumo do seguimento pedagóxico semanal do alumno/a **${student}**, elaborado no marco do modelo inclusivo e de atención á diversidade da Consellería de Educación.\n\n`;
       text += `📊 **Resumo de Participación e Dinámica na Aula:**\n`;
       text += `• Rexistros analizados: ${total} sesións.\n`;
       text += `• Nivel medio de enerxía e disposición: ${energyAvg} de 5.\n\n`;
@@ -548,7 +585,7 @@
 
       text += `🤝 **Orientacións para a colaboración coa familia:**\nContinuamos traballando na aula o reforzo positivo e a autorregulación emocional. Agradecemos o voso apoio continuo dende o fogar para manter unha liña de intervención coherente e favorecedora do seu desenvolvemento pedagóxico e benestar integral.\n\nAtentamente,\nO equipo docente.`;
 
-      document.getElementById('report-title').textContent = `Informe Semanal - Alumno/a ${student}`;
+      document.getElementById('report-title').textContent = `Informe Semanal - ${student}`;
       document.getElementById('report-subtitle').textContent = `Data de xeración: ${new Date().toLocaleDateString('gl-ES')}`;
       document.getElementById('report-body').innerText = text;
       document.getElementById('report-output-card').classList.remove('hidden');
