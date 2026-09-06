@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ControlAula v.25 - Acceso Seguro</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <!-- SDK Oficial de Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; margin: 0; }
+    .font-display { font-family: 'Fraunces', serif; }
+    .mood-btn { transition: all 0.2s ease; }
+    .mood-btn:hover { transform: scale(1.15); }
+    .mood-btn.selected { transform: scale(1.2); box-shadow: 0 0 0 3px currentColor, 0 0 12px rgba(0,0,0,0.15); border-radius: 9999px; }
+    .card-enter { animation: cardIn 0.35s ease-out; }
+    @keyframes cardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .toggle-track { width: 44px; height: 24px; border-radius: 12px; transition: background 0.2s; cursor: pointer; position: relative; }
+    .toggle-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: transform 0.2s; }
+    .toggle-track.on .toggle-thumb { transform: translateX(20px); }
+    .tab-btn { transition: all 0.2s; }
+    .toast-msg { animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+    .energy-slider { -webkit-appearance: none; appearance: none; height: 8px; border-radius: 4px; outline: none; }
+    .energy-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+    .record-card { transition: all 0.2s; }
+    .record-card:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body class="h-full">
+
+  <!-- PANTALLA DE ACCESO SEGURO -->
+  <div id="auth-gate" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl text-center fade-in">
+      <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4" style="background: #e8efe9;">
+        <i data-lucide="shield-check" style="width:36px;height:36px;color:#2d6a4f;"></i>
+      </div>
+      <h2 class="font-display text-2xl font-bold mb-2" style="color:#1f2937;">ControlAula v.25</h2>
+      <p class="text-sm mb-6" style="color:#6b7280;">Acceso exclusivo para docentes autorizados.</p>
+      
+      <form onsubmit="handleAuth(event)" class="space-y-4 text-left">
+        <div>
+          <label for="auth-email" class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Correo Electrónico</label>
+          <input type="email" id="auth-email" required placeholder="correo@dominio.com" class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" style="border-color:#d0ddd2; background:#f7faf8;">
+        </div>
+        <div>
+          <label for="auth-password" class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Contraseña</label>
+          <input type="password" id="auth-password" required placeholder="••••••••" class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" style="border-color:#d0ddd2; background:#f7faf8;">
+        </div>
+        
+        <div id="auth-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200"></div>
+
+        <button type="submit" id="btn-login" class="w-full py-3.5 rounded-xl text-white font-semibold text-sm shadow-md transition hover:opacity-95 flex justify-center items-center gap-2" style="background: linear-gradient(135deg, #2d6a4f, #40916c);">
+          <span>Acceder al Panel</span> →
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- APLICACIÓN PRINCIPAL -->
+  <div id="app" class="h-full w-full overflow-auto hidden" style="background: #f0f4f1;">
+    
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden">
+      <div class="toast-msg px-5 py-3 rounded-xl shadow-lg text-white font-medium text-sm" style="background: #2d6a4f;">
+        <span id="toast-text"></span>
+      </div>
+    </div>
+
+    <header class="px-5 pt-6 pb-4" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+      <div class="max-w-2xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(255,255,255,0.2);">
+            <i data-lucide="heart-handshake" style="width:22px;height:22px;color:#fff;"></i>
+          </div>
+          <div>
+            <h1 id="main-title" class="font-display text-xl font-bold text-white leading-tight">ControlAula v.25</h1>
+            <p id="student-display" class="text-sm" style="color: rgba(255,255,255,0.8);">Docente: <span id="user-email-tag" class="font-semibold text-white"></span></p>
+          </div>
+        </div>
+        <button onclick="logout()" class="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition" title="Cerrar sesión">
+          <i data-lucide="log-out" style="width:20px;height:20px;"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="sticky top-0 z-30 px-4 py-2" style="background: #e8efe9; border-bottom: 1px solid #d0ddd2;">
+      <div class="max-w-2xl mx-auto flex gap-2">
+        <button onclick="switchTab('form')" id="tab-form" class="tab-btn flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2" style="background:#2d6a4f;color:#fff;">
+          <i data-lucide="clipboard-plus" style="width:16px;height:16px;"></i> Registrar
+        </button>
+        <button onclick="switchTab('history')" id="tab-history" class="tab-btn flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2" style="background:transparent;color:#2d6a4f;">
+          <i data-lucide="history" style="width:16px;height:16px;"></i> Historial
+        </button>
+        <button onclick="switchTab('stats')" id="tab-stats" class="tab-btn flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2" style="background:transparent;color:#2d6a4f;">
+          <i data-lucide="bar-chart-3" style="width:16px;height:16px;"></i> Resumen
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Tab -->
+    <div id="view-form" class="px-4 py-5 fade-in">
+      <div class="max-w-2xl mx-auto space-y-4">
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label for="inp-date" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">📅 Fecha</label>
+              <input type="date" id="inp-date" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
+            </div>
+            <div>
+              <label for="inp-initials" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Iniciales alumno</label>
+              <input type="text" id="inp-initials" placeholder="ej. JMG" maxlength="3" class="w-full rounded-xl border px-3 py-2.5 text-sm uppercase" style="border-color:#d0ddd2; background:#f7faf8;">
+            </div>
+            <div>
+              <label for="inp-teacher" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">👩‍🏫 Docente</label>
+              <input type="text" id="inp-teacher" placeholder="Tu nombre" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
+            </div>
+          </div>
+        </div>
+
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
+          <p id="mood-label" class="text-xs font-semibold mb-3" style="color:#2d6a4f;">¿Cómo se ha sentido hoy?</p>
+          <div class="flex items-center justify-around">
+            <button onclick="selectMood('muy_mal')" data-mood="muy_mal" class="mood-btn text-3xl p-1">😢</button>
+            <button onclick="selectMood('mal')" data-mood="mal" class="mood-btn text-3xl p-1">😟</button>
+            <button onclick="selectMood('regular')" data-mood="regular" class="mood-btn text-3xl p-1">😐</button>
+            <button onclick="selectMood('bien')" data-mood="bien" class="mood-btn text-3xl p-1">🙂</button>
+            <button onclick="selectMood('muy_bien')" data-mood="muy_bien" class="mood-btn text-3xl p-1">😊</button>
+          </div>
+        </div>
+
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
+          <p class="text-xs font-semibold mb-2" style="color:#2d6a4f;">⚡ Nivel de energía</p>
+          <div class="flex items-center gap-3">
+            <span class="text-xs" style="color:#6b7280;">Bajo</span>
+            <input type="range" id="inp-energy" min="1" max="5" value="3" class="energy-slider flex-1" style="background: linear-gradient(90deg, #b7e4c7, #2d6a4f);">
+            <span class="text-xs" style="color:#6b7280;">Alto</span>
+            <span id="energy-val" class="text-sm font-bold rounded-lg px-2 py-0.5" style="background:#e8efe9;color:#2d6a4f;">3</span>
+          </div>
+        </div>
+
+        <div class="card-enter rounded-2xl p-5 shadow-sm space-y-4" style="background:#fff; border: 1px solid #d0ddd2;">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium" style="color:#374151;">🙋 Ha participado en clase</span>
+            <div id="tog-participated" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('participated')">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium" style="color:#374151;">📏 Ha seguido las normas</span>
+            <div id="tog-rules" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('rules')">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium" style="color:#374151;">🤝 Ha necesitado apoyo extra</span>
+            <div id="tog-support" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('support')">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
+          <label for="inp-strategy" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">🧩 Estrategia utilizada</label>
+          <select id="inp-strategy" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
+            <option value="">Selecciona una estrategia...</option>
+            <option value="tiempo_fuera">⏸ Tiempo fuera / Pausa</option>
+            <option value="refuerzo_positivo">⭐ Refuerzo positivo</option>
+            <option value="economía_fichas">🎯 Economía de fichas</option>
+            <option value="acompañamiento">🤝 Acompañamiento individual</option>
+            <option value="adaptación_tarea">📝 Adaptación de la tarea</option>
+            <option value="cambio_actividad">🔄 Cambio de actividad</option>
+            <option value="relajación">🧘 Técnica de relajación</option>
+            <option value="comunicación_familia">📞 Comunicación con familia</option>
+            <option value="otra">💡 Otra</option>
+          </select>
+          <div class="mt-3 flex items-center gap-2">
+            <span class="text-sm" style="color:#374151;">¿Funcionó?</span>
+            <div id="tog-strategy-worked" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('strategyWorked')">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
+          <label class="block text-xs font-semibold mb-3" style="color:#2d6a4f;">🎯 Conductas observadas</label>
+          <div class="space-y-2" id="behavior-list">
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="agresividad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😠 Agresividad / Violencia</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="negatividad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😞 Negatividad / Aislamiento</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="impulsividad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">⚡ Impulsividad / Falta de control</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="desatencion" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">👀 Desatención / Distracción</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="desobediencia" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">🚫 Desobediencia / Desafío</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="ansiedad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😰 Ansiedad / Nerviosismo</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="buena_conducta" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">✨ Buena conducta / Colaboración</span></label>
+          </div>
+        </div>
+
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
+          <label for="inp-obs" id="obs-label" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">📝 Observaciones</label>
+          <textarea id="inp-obs" rows="3" placeholder="¿Qué ha ocurrido hoy? Comportamiento, incidencias..." class="w-full rounded-xl border px-3 py-2.5 text-sm resize-none" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
+        </div>
+
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
+          <label for="inp-positive" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">🌟 Momento positivo del día</label>
+          <textarea id="inp-positive" rows="2" placeholder="Algo bueno que haya pasado hoy..." class="w-full rounded-xl border px-3 py-2.5 text-sm resize-none" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
+        </div>
+
+        <button id="btn-submit" onclick="submitRecord()" class="w-full py-3.5 rounded-2xl text-white font-semibold text-sm shadow-md flex items-center justify-center gap-2" style="background: linear-gradient(135deg, #2d6a4f, #40916c);">
+          <i data-lucide="save" style="width:18px;height:18px;"></i>
+          <span id="btn-submit-text">Guardar registro</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div id="view-history" class="px-4 py-5 hidden">
+      <div class="max-w-2xl mx-auto">
+        <div id="history-empty" class="text-center py-12 hidden">
+          <div class="text-5xl mb-3">📋</div>
+          <p class="font-semibold" style="color:#2d6a4f;">Sin registros todavía</p>
+        </div>
+        <div id="history-list" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- Stats Tab -->
+    <div id="view-stats" class="px-4 py-5 hidden">
+      <div class="max-w-2xl mx-auto space-y-4">
+        <div id="stats-empty" class="text-center py-12 hidden">
+          <div class="text-5xl mb-3">📊</div>
+          <p class="font-semibold" style="color:#2d6a4f;">Sin datos suficientes</p>
+        </div>
+        <div id="stats-content" class="space-y-4"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // COLOCA AQUÍ TUS CREDENCIALES REALES DE SUPABASE
+    // -------------------------------------------------------------
+    const SUPABASE_URL = "https://xxxx.supabase.co"; // Substituír pola túa URL real
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJKV1QiLCJ..."; // Substituír pola túa clave anon real
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const RECORDS_KEY = "controlaula_records_local";
+    let allRecords = [];
+    let selectedMood = '';
+    let toggles = { participated: false, rules: false, support: false, strategyWorked: false };
+    let selectedBehaviors = new Set();
+    const moodMap = { muy_mal: '😢', mal: '😟', regular: '😐', bien: '🙂', muy_bien: '😊' };
+
+    async function checkAuth() {
+      const { data: { session } } = await _supabase.auth.getSession();
+      if (session && session.user) {
+        document.getElementById("auth-gate").style.display = "none";
+        document.getElementById("app").classList.remove("hidden");
+        document.getElementById("user-email-tag").textContent = session.user.email;
+        document.getElementById("inp-teacher").value = session.user.email.split('@')[0];
+        loadLocalData();
+      } else {
+        document.getElementById("auth-gate").style.display = "flex";
+        document.getElementById("app").classList.add("hidden");
+      }
+    }
+
+    async function handleAuth(e) {
+      e.preventDefault();
+      const email = document.getElementById("auth-email").value.trim().toLowerCase();
+      const password = document.getElementById("auth-password").value;
+      const errBox = document.getElementById("auth-error");
+      const btn = document.getElementById("btn-login");
+
+      errBox.classList.add("hidden");
+      btn.disabled = true;
+      btn.innerHTML = "Verificando en Supabase...";
+
+      try {
+        const { data, error } = await _supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (error) {
+          errBox.textContent = "⛔ Acceso denegado: " + (error.message === "Invalid login credentials" ? "Correo o contraseña incorrectos." : error.message);
+          errBox.classList.remove("hidden");
+          btn.disabled = false;
+          btn.innerHTML = "<span>Acceder al Panel</span> →";
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = "<span>Acceder al Panel</span> →";
+          checkAuth();
+        }
+      } catch (err) {
+        errBox.textContent = "❌ Error de conexión: " + err.message;
+        errBox.classList.remove("hidden");
+        btn.disabled = false;
+        btn.innerHTML = "<span>Acceder al Panel</span> →";
+      }
+    }
+
+    async function logout() {
+      await _supabase.auth.signOut();
+      checkAuth();
+    }
+
+    function loadLocalData() {
+      try { allRecords = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]"); } catch { allRecords = []; }
+      renderHistory();
+      renderStats();
+    }
+
+    function saveLocalData() {
+      localStorage.setItem(RECORDS_KEY, JSON.stringify(allRecords));
+      renderHistory();
+      renderStats();
+    }
+
+    document.getElementById('inp-date').valueAsDate = new Date();
+    document.getElementById('inp-energy').addEventListener('input', function() { document.getElementById('energy-val').textContent = this.value; });
+    document.querySelectorAll('.behavior-check').forEach(cb => { cb.addEventListener('change', function() { if (this.checked) selectedBehaviors.add(this.dataset.behavior); else selectedBehaviors.delete(this.dataset.behavior); }); });
+
+    function selectMood(m) { selectedMood = m; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('selected', b.dataset.mood === m)); }
+    function toggleSwitch(k) { toggles[k] = !toggles[k]; const el = document.getElementById({ participated: 'tog-participated', rules: 'tog-rules', support: 'tog-support', strategyWorked: 'tog-strategy-worked' }[k]); if (toggles[k]) { el.classList.add('on'); el.style.background = '#2d6a4f'; } else { el.classList.remove('on'); el.style.background = '#d1d5db'; } }
+
+    function switchTab(t) {
+      ['form', 'history', 'stats'].forEach(v => {
+        const view = document.getElementById(`view-${v}`);
+        const tabBtn = document.getElementById(`tab-${v}`);
+        if (v === t) { view.classList.remove('hidden'); tabBtn.style.background = '#2d6a4f'; tabBtn.style.color = '#fff'; }
+        else { view.classList.add('hidden'); tabBtn.style.background = 'transparent'; tabBtn.style.color = '#2d6a4f'; }
+      });
+    }
+
+    async function submitRecord() {
+      if (!selectedMood) { showToast('Selecciona un estado emocional'); return; }
+      const date = document.getElementById('inp-date').value;
+      if (!date) { showToast('Selecciona una fecha'); return; }
+
+      const session = (await _supabase.auth.getSession()).data.session;
+
+      const record = {
+        id: Date.now().toString(),
+        user_email: session ? session.user.email : 'docente',
+        date: date,
+        student_initials: document.getElementById('inp-initials').value.trim().toUpperCase() || 'ALU',
+        teacher_name: document.getElementById('inp-teacher').value.trim(),
+        mood: selectedMood,
+        energy_level: parseInt(document.getElementById('inp-energy').value),
+        participated: toggles.participated,
+        followed_rules: toggles.rules,
+        needed_support: toggles.support,
+        strategy_used: document.getElementById('inp-strategy').value,
+        strategy_worked: toggles.strategyWorked,
+        behaviors: Array.from(selectedBehaviors).join(', '),
+        observation: document.getElementById('inp-obs').value.trim(),
+        positive_moment: document.getElementById('inp-positive').value.trim()
+      };
+
+      allRecords.unshift(record);
+      saveLocalData();
+      showToast('✅ Registro guardado correctamente');
+      resetForm();
+    }
+
+    function resetForm() {
+      selectedMood = '';
+      selectedBehaviors.clear();
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelectorAll('.behavior-check').forEach(cb => cb.checked = false);
+      document.getElementById('inp-energy').value = 3;
+      document.getElementById('energy-val').textContent = '3';
+      document.getElementById('inp-strategy').value = '';
+      document.getElementById('inp-obs').value = '';
+      document.getElementById('inp-positive').value = '';
+      ['participated', 'rules', 'support', 'strategyWorked'].forEach(k => { toggles[k] = false; const el = document.getElementById({ participated: 'tog-participated', rules: 'tog-rules', support: 'tog-support', strategyWorked: 'tog-strategy-worked' }[k]); el.classList.remove('on'); el.style.background = '#d1d5db'; });
+      document.getElementById('inp-date').valueAsDate = new Date();
+    }
+
+    function showToast(msg) { const toast = document.getElementById('toast'); document.getElementById('toast-text').textContent = msg; toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 3000); }
+
+    function renderHistory() {
+      const list = document.getElementById('history-list');
+      const empty = document.getElementById('history-empty');
+      if (allRecords.length === 0) { empty.classList.remove('hidden'); list.innerHTML = ''; return; }
+      empty.classList.add('hidden');
+      list.innerHTML = allRecords.map(rec => `
+        <div class="record-card rounded-2xl p-4 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">${moodMap[rec.mood] || '❓'}</span>
+              <div>
+                <p class="font-semibold text-sm" style="color:#1f2937;">${rec.date} · <strong style="color:#2d6a4f;">${rec.student_initials}</strong></p>
+                <p class="text-xs" style="color:#6b7280;">Docente: ${rec.teacher_name} · Energía: ${rec.energy_level}/5</p>
+              </div>
+            </div>
+            <button onclick="deleteRecord('${rec.id}')" class="text-red-500 hover:text-red-700 text-xs font-semibold">Eliminar</button>
+          </div>
+          ${rec.observation ? `<p class="text-xs text-gray-600 mt-2">${rec.observation}</p>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function deleteRecord(id) { allRecords = allRecords.filter(r => r.id !== id); saveLocalData(); showToast('Registro eliminado'); }
+
+    function renderStats() {
+      const content = document.getElementById('stats-content');
+      const empty = document.getElementById('stats-empty');
+      if (allRecords.length === 0) { empty.classList.remove('hidden'); content.innerHTML = ''; return; }
+      empty.classList.add('hidden');
+      content.innerHTML = `<div class="rounded-2xl p-5 text-center shadow-sm" style="background:#fff; border:1px solid #d0ddd2;"><p class="text-3xl font-bold font-display" style="color:#2d6a4f;">${allRecords.length}</p><p class="text-xs mt-1" style="color:#6b7280;">Registros totales realizados</p></div>`;
+    }
+
+    lucide.createIcons();
+    checkAuth();
+  </script>
+</body>
+</html>
