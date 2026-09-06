@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full">
+<html lang="gl" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ControlAula v.25 - Acceso Seguro</title>
 
-  <!-- 1. Carga de Tailwind CSS y Tipografía -->
+  <!-- 1. Carga de Tailwind CSS e Tipografía -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
 
-  <!-- 2. Carga de Librerías Externas -->
+  <!-- 2. Carga de Librarías Externas -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -55,14 +55,14 @@
           <input type="email" id="auth-email" required placeholder="correo@dominio.com" class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" style="border-color:#d0ddd2; background:#f7faf8;">
         </div>
         <div>
-          <label for="auth-password" class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Contraseña</label>
+          <label for="auth-password" class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Contrasinal</label>
           <input type="password" id="auth-password" required placeholder="••••••••" class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" style="border-color:#d0ddd2; background:#f7faf8;">
         </div>
         
         <div id="auth-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200"></div>
 
         <button type="submit" id="btn-login" class="w-full py-3.5 rounded-xl text-white font-semibold text-sm shadow-md transition hover:opacity-95 flex justify-center items-center gap-2" style="background: linear-gradient(135deg, #2d6a4f, #40916c);">
-          <span>Acceder al Panel</span> →
+          <span>Acceder ao Panel</span> →
         </button>
       </form>
     </div>
@@ -88,7 +88,7 @@
             <p id="student-display" class="text-sm" style="color: rgba(255,255,255,0.8);">Docente: <span id="user-email-tag" class="font-semibold text-white"></span></p>
           </div>
         </div>
-        <button onclick="logout()" class="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition" title="Cerrar sesión">
+        <button onclick="logout()" class="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition" title="Pechar sesión">
           <i data-lucide="log-out" style="width:20px;height:20px;"></i>
         </button>
       </div>
@@ -97,13 +97,13 @@
     <div class="sticky top-0 z-30 px-4 py-2" style="background: #e8efe9; border-bottom: 1px solid #d0ddd2;">
       <div class="max-w-2xl mx-auto flex gap-2">
         <button onclick="switchTab('form')" id="tab-form" class="tab-btn flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2" style="background:#2d6a4f;color:#fff;">
-          <i data-lucide="clipboard-plus" style="width:16px;height:16px;"></i> Registrar
+          <i data-lucide="clipboard-plus" style="width:16px;height:16px;"></i> Rexistrar
         </button>
         <button onclick="switchTab('history')" id="tab-history" class="tab-btn flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2" style="background:transparent;color:#2d6a4f;">
           <i data-lucide="history" style="width:16px;height:16px;"></i> Historial
         </button>
         <button onclick="switchTab('stats')" id="tab-stats" class="tab-btn flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2" style="background:transparent;color:#2d6a4f;">
-          <i data-lucide="bar-chart-3" style="width:16px;height:16px;"></i> Resumen
+          <i data-lucide="file-text" style="width:16px;height:16px;"></i> Informe Semanal
         </button>
       </div>
     </div>
@@ -114,22 +114,22 @@
         <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label for="inp-date" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">📅 Fecha</label>
+              <label for="inp-date" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">📅 Data</label>
               <input type="date" id="inp-date" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
             </div>
             <div>
-              <label for="inp-initials" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Iniciales alumno</label>
-              <input type="text" id="inp-initials" placeholder="ej. JMG" maxlength="3" class="w-full rounded-xl border px-3 py-2.5 text-sm uppercase" style="border-color:#d0ddd2; background:#f7faf8;">
+              <label for="inp-initials" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Iniciais do alumno/a</label>
+              <input type="text" id="inp-initials" placeholder="ex. JMG" maxlength="3" class="w-full rounded-xl border px-3 py-2.5 text-sm uppercase" style="border-color:#d0ddd2; background:#f7faf8;">
             </div>
             <div>
               <label for="inp-teacher" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">👩‍🏫 Docente</label>
-              <input type="text" id="inp-teacher" placeholder="Tu nombre" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
+              <input type="text" id="inp-teacher" placeholder="O teu nome" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
             </div>
           </div>
         </div>
 
         <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <p id="mood-label" class="text-xs font-semibold mb-3" style="color:#2d6a4f;">¿Cómo se ha sentido hoy?</p>
+          <p id="mood-label" class="text-xs font-semibold mb-3" style="color:#2d6a4f;">Como se sentiu hoxe?</p>
           <div class="flex items-center justify-around">
             <button onclick="selectMood('muy_mal')" data-mood="muy_mal" class="mood-btn text-3xl p-1">😢</button>
             <button onclick="selectMood('mal')" data-mood="mal" class="mood-btn text-3xl p-1">😟</button>
@@ -140,9 +140,9 @@
         </div>
 
         <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <p class="text-xs font-semibold mb-2" style="color:#2d6a4f;">⚡ Nivel de energía</p>
+          <p class="text-xs font-semibold mb-2" style="color:#2d6a4f;">⚡ Nivel de enerxía</p>
           <div class="flex items-center gap-3">
-            <span class="text-xs" style="color:#6b7280;">Bajo</span>
+            <span class="text-xs" style="color:#6b7280;">Baixo</span>
             <input type="range" id="inp-energy" min="1" max="5" value="3" class="energy-slider flex-1" style="background: linear-gradient(90deg, #b7e4c7, #2d6a4f);">
             <span class="text-xs" style="color:#6b7280;">Alto</span>
             <span id="energy-val" class="text-sm font-bold rounded-lg px-2 py-0.5" style="background:#e8efe9;color:#2d6a4f;">3</span>
@@ -151,19 +151,19 @@
 
         <div class="card-enter rounded-2xl p-5 shadow-sm space-y-4" style="background:#fff; border: 1px solid #d0ddd2;">
           <div class="flex items-center justify-between">
-            <span class="text-sm font-medium" style="color:#374151;">🙋 Ha participado en clase</span>
+            <span class="text-sm font-medium" style="color:#374151;">🙋 Participou na aula</span>
             <div id="tog-participated" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('participated')">
               <div class="toggle-thumb"></div>
             </div>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-sm font-medium" style="color:#374151;">📏 Ha seguido las normas</span>
+            <span class="text-sm font-medium" style="color:#374151;">📏 Seguiu as normas</span>
             <div id="tog-rules" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('rules')">
               <div class="toggle-thumb"></div>
             </div>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-sm font-medium" style="color:#374151;">🤝 Ha necesitado apoyo extra</span>
+            <span class="text-sm font-medium" style="color:#374151;">🤝 Precisou apoio extra</span>
             <div id="tog-support" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('support')">
               <div class="toggle-thumb"></div>
             </div>
@@ -171,21 +171,21 @@
         </div>
 
         <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <label for="inp-strategy" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">🧩 Estrategia utilizada</label>
+          <label for="inp-strategy" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">🧩 Estratexia utilizada</label>
           <select id="inp-strategy" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
-            <option value="">Selecciona una estrategia...</option>
-            <option value="tiempo_fuera">⏸ Tiempo fuera / Pausa</option>
-            <option value="refuerzo_positivo">⭐ Refuerzo positivo</option>
+            <option value="">Selecciona unha estratexia...</option>
+            <option value="tiempo_fuera">⏸ Tempo fóra / Pausa</option>
+            <option value="refuerzo_positivo">⭐ Reforzo positivo</option>
             <option value="economía_fichas">🎯 Economía de fichas</option>
-            <option value="acompañamiento">🤝 Acompañamiento individual</option>
-            <option value="adaptación_tarea">📝 Adaptación de la tarea</option>
-            <option value="cambio_actividad">🔄 Cambio de actividad</option>
-            <option value="relajación">🧘 Técnica de relajación</option>
-            <option value="comunicación_familia">📞 Comunicación con familia</option>
-            <option value="otra">💡 Otra</option>
+            <option value="acompañamiento">🤝 Acompañamento individual</option>
+            <option value="adaptación_tarea">📝 Adaptación da tarefa</option>
+            <option value="cambio_actividad">🔄 Cambio de actividade</option>
+            <option value="relajación">🧘 Técnica de relaxación</option>
+            <option value="comunicación_familia">📞 Comunicación coa familia</option>
+            <option value="otra">💡 Outra</option>
           </select>
           <div class="mt-3 flex items-center gap-2">
-            <span class="text-sm" style="color:#374151;">¿Funcionó?</span>
+            <span class="text-sm" style="color:#374151;">Funcionou?</span>
             <div id="tog-strategy-worked" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('strategyWorked')">
               <div class="toggle-thumb"></div>
             </div>
@@ -193,54 +193,79 @@
         </div>
 
         <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <label class="block text-xs font-semibold mb-3" style="color:#2d6a4f;">🎯 Conductas observadas</label>
+          <label class="block text-xs font-semibold mb-3" style="color:#2d6a4f;">🎯 Condutas observadas</label>
           <div class="space-y-2" id="behavior-list">
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="agresividad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😠 Agresividad / Violencia</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="negatividad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😞 Negatividad / Aislamiento</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="impulsividad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">⚡ Impulsividad / Falta de control</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="agresividad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😠 Agresividade / Violencia</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="negatividad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😞 Negatividade / Illamento</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="impulsividad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">⚡ Impulsividade / Falta de control</span></label>
             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="desatencion" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">👀 Desatención / Distracción</span></label>
             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="desobediencia" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">🚫 Desobediencia / Desafío</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="ansiedad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😰 Ansiedad / Nerviosismo</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="buena_conducta" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">✨ Buena conducta / Colaboración</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="ansiedad" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😰 Ansiedade / Nervosismo</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="buena_conducta" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">✨ Boa conducta / Colaboración</span></label>
           </div>
         </div>
 
         <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <label for="inp-obs" id="obs-label" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">📝 Observaciones</label>
-          <textarea id="inp-obs" rows="3" placeholder="¿Qué ha ocurrido hoy? Comportamiento, incidencias..." class="w-full rounded-xl border px-3 py-2.5 text-sm resize-none" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
+          <label for="inp-obs" id="obs-label" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">📝 Observacións do docente</label>
+          <textarea id="inp-obs" rows="3" placeholder="Que ocorreu hoxe? Comportamento, incidencias..." class="w-full rounded-xl border px-3 py-2.5 text-sm resize-none" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
         </div>
 
         <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <label for="inp-positive" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">🌟 Momento positivo del día</label>
-          <textarea id="inp-positive" rows="2" placeholder="Algo bueno que haya pasado hoy..." class="w-full rounded-xl border px-3 py-2.5 text-sm resize-none" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
+          <label for="inp-positive" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">🌟 Momento positivo do día</label>
+          <textarea id="inp-positive" rows="2" placeholder="Algo bo que pasara hoxe..." class="w-full rounded-xl border px-3 py-2.5 text-sm resize-none" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
         </div>
 
         <button id="btn-submit" onclick="submitRecord()" class="w-full py-3.5 rounded-2xl text-white font-semibold text-sm shadow-md flex items-center justify-center gap-2" style="background: linear-gradient(135deg, #2d6a4f, #40916c);">
           <i data-lucide="save" style="width:18px;height:18px;"></i>
-          <span id="btn-submit-text">Guardar registro</span>
+          <span id="btn-submit-text">Gardar rexistro</span>
         </button>
       </div>
     </div>
 
-    <!-- History Tab -->
+    <!-- History Tab (Agrupado por Alumno) -->
     <div id="view-history" class="px-4 py-5 hidden">
       <div class="max-w-2xl mx-auto">
         <div id="history-empty" class="text-center py-12 hidden">
           <div class="text-5xl mb-3">📋</div>
-          <p class="font-semibold" style="color:#2d6a4f;">Sin registros todavía</p>
+          <p class="font-semibold" style="color:#2d6a4f;">Sen rexistros aínda</p>
         </div>
-        <div id="history-list" class="space-y-3"></div>
+        <div id="student-summary-list" class="space-y-4"></div>
       </div>
     </div>
 
-    <!-- Stats Tab -->
+    <!-- Stats / Módulo Informe Semanal con IA -->
     <div id="view-stats" class="px-4 py-5 hidden">
       <div class="max-w-2xl mx-auto space-y-4">
-        <div id="stats-empty" class="text-center py-12 hidden">
-          <div class="text-5xl mb-3">📊</div>
-          <p class="font-semibold" style="color:#2d6a4f;">Sin datos suficientes</p>
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
+          <h3 class="font-display font-bold text-lg mb-2" style="color:#2d6a4f;">📄 Xenerador de Informe Semanal para Familias</h3>
+          <p class="text-xs text-gray-600 mb-4">Selecciona o alumno e a semana para elaborar un resumo formativo, adaptado ás directrices do modelo inclusivo da Consellería de Educación.</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <div>
+              <label class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Alumno/a</label>
+              <select id="report-student" class="w-full rounded-xl border px-3 py-2 text-sm" style="border-color:#d0ddd2; background:#f7faf8;"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Semana</label>
+              <input type="date" id="report-date" class="w-full rounded-xl border px-3 py-2 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
+            </div>
+          </div>
+
+          <button onclick="generateWeeklyReport()" class="w-full py-3 rounded-xl text-white font-semibold text-sm flex justify-center items-center gap-2" style="background: linear-gradient(135deg, #2d6a4f, #40916c);">
+            <i data-lucide="sparkles" style="width:16px;height:16px;"></i> Generar Resumo Inclusivo
+          </button>
         </div>
-        <div id="stats-content" class="space-y-4"></div>
+
+        <div id="report-output-card" class="hidden card-enter rounded-2xl p-6 shadow-sm bg-white border border-emerald-200">
+          <div class="flex items-center justify-between mb-4 border-b pb-3">
+            <div>
+              <h4 class="font-bold text-emerald-900" id="report-title">Informe Semanal</h4>
+              <p class="text-xs text-emerald-700" id="report-subtitle"></p>
+            </div>
+            <button onclick="copyReport()" class="text-xs px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800 font-medium hover:bg-emerald-200">Copiar Texto</button>
+          </div>
+          <div id="report-body" class="text-sm text-gray-800 whitespace-pre-line leading-relaxed"></div>
+        </div>
       </div>
     </div>
 
@@ -263,7 +288,8 @@
     let selectedMood = '';
     let toggles = { participated: false, rules: false, support: false, strategyWorked: false };
     let selectedBehaviors = new Set();
-    const moodMap = { muy_mal: '😢', mal: '😟', regular: '😐', bien: '🙂', muy_bien: '😊' };
+    const moodMap = { muy_mal: '😢 Moido mal', mal: '😟 Mal', regular: '😐 Regular', bien: '🙂 Ben', muy_bien: '😊 Moi ben' };
+    const moodEmoji = { muy_mal: '😢', mal: '😟', regular: '😐', bien: '🙂', muy_bien: '😊' };
 
     async function checkAuth() {
       if (!_supabase) return;
@@ -280,7 +306,7 @@
           document.getElementById("app").classList.add("hidden");
         }
       } catch (err) {
-        console.error("Error al comprobar la sesión:", err);
+        console.error("Erro ao comprobar a sesión:", err);
       }
     }
 
@@ -304,20 +330,20 @@
         });
 
         if (error) {
-          errBox.textContent = "⛔ Acceso denegado: " + (error.message === "Invalid login credentials" ? "Correo o contraseña incorrectos." : error.message);
+          errBox.textContent = "⛔ Acceso denegado: " + (error.message === "Invalid login credentials" ? "Correo ou contrasinal incorrectos." : error.message);
           errBox.classList.remove("hidden");
           btn.disabled = false;
-          btn.innerHTML = "<span>Acceder al Panel</span> →";
+          btn.innerHTML = "<span>Acceder ao Panel</span> →";
         } else {
           btn.disabled = false;
-          btn.innerHTML = "<span>Acceder al Panel</span> →";
+          btn.innerHTML = "<span>Acceder ao Panel</span> →";
           checkAuth();
         }
       } catch (err) {
-        errBox.textContent = "❌ Error de conexión: " + err.message;
+        errBox.textContent = "❌ Erro de conexión: " + err.message;
         errBox.classList.remove("hidden");
         btn.disabled = false;
-        btn.innerHTML = "<span>Acceder al Panel</span> →";
+        btn.innerHTML = "<span>Acceder ao Panel</span> →";
       }
     }
 
@@ -328,14 +354,14 @@
 
     function loadLocalData() {
       try { allRecords = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]"); } catch { allRecords = []; }
-      renderHistory();
-      renderStats();
+      renderHistoryGrouped();
+      populateStudentSelect();
     }
 
     function saveLocalData() {
       localStorage.setItem(RECORDS_KEY, JSON.stringify(allRecords));
-      renderHistory();
-      renderStats();
+      renderHistoryGrouped();
+      populateStudentSelect();
     }
 
     function selectMood(m) { selectedMood = m; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('selected', b.dataset.mood === m)); }
@@ -353,7 +379,7 @@
     async function submitRecord() {
       if (!selectedMood) { showToast('Selecciona un estado emocional'); return; }
       const date = document.getElementById('inp-date').value;
-      if (!date) { showToast('Selecciona una fecha'); return; }
+      if (!date) { showToast('Selecciona unha data'); return; }
 
       let userEmail = 'docente';
       if (_supabase) {
@@ -383,7 +409,7 @@
 
       allRecords.unshift(record);
       saveLocalData();
-      showToast('✅ Registro guardado correctamente');
+      showToast('✅ Rexistro gardado correctamente');
       resetForm();
     }
 
@@ -403,36 +429,135 @@
 
     function showToast(msg) { const toast = document.getElementById('toast'); document.getElementById('toast-text').textContent = msg; toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 3000); }
 
-    function renderHistory() {
-      const list = document.getElementById('history-list');
+    // RENDERIZADO DO HISTORIAL AGRUPADO POR ALUMNO
+    function renderHistoryGrouped() {
+      const container = document.getElementById('student-summary-list');
       const empty = document.getElementById('history-empty');
-      if (allRecords.length === 0) { empty.classList.remove('hidden'); list.innerHTML = ''; return; }
+
+      if (allRecords.length === 0) {
+        empty.classList.remove('hidden');
+        container.innerHTML = '';
+        return;
+      }
       empty.classList.add('hidden');
-      list.innerHTML = allRecords.map(rec => `
-        <div class="record-card rounded-2xl p-4 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <div class="flex items-start justify-between mb-2">
-            <div class="flex items-center gap-2">
-              <span class="text-2xl">${moodMap[rec.mood] || '❓'}</span>
-              <div>
-                <p class="font-semibold text-sm" style="color:#1f2937;">${rec.date} · <strong style="color:#2d6a4f;">${rec.student_initials}</strong></p>
-                <p class="text-xs" style="color:#6b7280;">Docente: ${rec.teacher_name} · Energía: ${rec.energy_level}/5</p>
+
+      // Agrupar por iniciais de alumno
+      const grouped = {};
+      allRecords.forEach(rec => {
+        const key = rec.student_initials || 'ALU';
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(rec);
+      });
+
+      let html = '';
+      Object.keys(grouped).forEach(student => {
+        const studentRecords = grouped[student];
+        const lastRec = studentRecords[0]; // O máis recente
+
+        html += `
+          <div class="rounded-2xl bg-white border border-emerald-200 overflow-hidden shadow-sm">
+            <div onclick="toggleStudentHistory('${student}')" class="p-4 cursor-pointer hover:bg-emerald-50/50 flex items-center justify-between transition">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-800 text-white font-bold flex items-center justify-center text-sm">
+                  ${student}
+                </div>
+                <div>
+                  <p class="font-bold text-gray-800 text-sm">Alumno/a: ${student} <span class="ml-2 text-xs font-normal text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">${studentRecords.length} rexistros</span></p>
+                  <p class="text-xs text-gray-500">Última entrada: <strong>${lastRec.date}</strong> · ${moodEmoji[lastRec.mood] || '😐'} Enerxía: ${lastRec.energy_level}/5</p>
+                </div>
               </div>
+              <i data-lucide="chevron-down" id="icon-${student}" class="w-5 h-5 text-emerald-800 transition-transform"></i>
             </div>
-            <button onclick="deleteRecord('${rec.id}')" class="text-red-500 hover:text-red-700 text-xs font-semibold">Eliminar</button>
+
+            <div id="details-${student}" class="hidden border-t border-gray-100 bg-gray-50/50 p-4 space-y-3">
+              <p class="text-xs font-semibold text-emerald-800 uppercase tracking-wider mb-2">Historial Completo do Alumno</p>
+              ${studentRecords.map(rec => `
+                <div class="bg-white p-3 rounded-xl border border-gray-200 text-xs space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-gray-700">${rec.date} · Docente: ${rec.teacher_name}</span>
+                    <button onclick="deleteRecord('${rec.id}')" class="text-red-500 hover:text-red-700 font-semibold">Eliminar</button>
+                  </div>
+                  <p><strong>Estado emocional:</strong> ${moodMap[rec.mood] || 'N/A'} · <strong>Enerxía:</strong> ${rec.energy_level}/5</p>
+                  ${rec.observation ? `<p class="text-gray-600 bg-gray-50 p-2 rounded-lg border mt-1"><strong>Observación:</strong> ${rec.observation}</p>` : ''}
+                  ${rec.positive_moment ? `<p class="text-emerald-700 bg-emerald-50 p-2 rounded-lg border border-emerald-100">🌟 <strong>Momento positivo:</strong> ${rec.positive_moment}</p>` : ''}
+                </div>
+              `).join('')}
+            </div>
           </div>
-          ${rec.observation ? `<p class="text-xs text-gray-600 mt-2">${rec.observation}</p>` : ''}
-        </div>
-      `).join('');
+        `;
+      });
+
+      container.innerHTML = html;
+      lucide.createIcons();
     }
 
-    function deleteRecord(id) { allRecords = allRecords.filter(r => r.id !== id); saveLocalData(); showToast('Registro eliminado'); }
+    function toggleStudentHistory(student) {
+      const el = document.getElementById(`details-${student}`);
+      const icon = document.getElementById(`icon-${student}`);
+      if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+      } else {
+        el.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+      }
+    }
 
-    function renderStats() {
-      const content = document.getElementById('stats-content');
-      const empty = document.getElementById('stats-empty');
-      if (allRecords.length === 0) { empty.classList.remove('hidden'); content.innerHTML = ''; return; }
-      empty.classList.add('hidden');
-      content.innerHTML = `<div class="rounded-2xl p-5 text-center shadow-sm" style="background:#fff; border:1px solid #d0ddd2;"><p class="text-3xl font-bold font-display" style="color:#2d6a4f;">${allRecords.length}</p><p class="text-xs mt-1" style="color:#6b7280;">Registros totales realizados</p></div>`;
+    function deleteRecord(id) {
+      allRecords = allRecords.filter(r => r.id !== id);
+      saveLocalData();
+      showToast('Rexistro eliminado');
+    }
+
+    function populateStudentSelect() {
+      const select = document.getElementById('report-student');
+      const students = [...new Set(allRecords.map(r => r.student_initials))];
+      select.innerHTML = students.map(s => `<option value="${s}">${s}</option>`).join('');
+      document.getElementById('report-date').valueAsDate = new Date();
+    }
+
+    // XENERADOR DE INFORME SEMANAL FORMATIVO (MODELO INCLUSIVO CONSELLERÍA)
+    function generateWeeklyReport() {
+      const student = document.getElementById('report-student').value;
+      if (!student) { showToast('Selecciona un alumno/a'); return; }
+
+      const studentRecords = allRecords.filter(r => r.student_initials === student);
+      if (studentRecords.length === 0) { showToast('Sen datos para este alumno/a'); return; }
+
+      const total = studentRecords.length;
+      const energyAvg = (studentRecords.reduce((a, b) => a + b.energy_level, 0) / total).toFixed(1);
+      const positiveMoments = studentRecords.map(r => r.positive_moment).filter(Boolean);
+      const observations = studentRecords.map(r => r.observation).filter(Boolean);
+
+      let text = `Estimada familia,\n\nPresentamos o resumo do seguimento pedagóxico semanal do alumno/a coas iniciais **${student}**, elaborado no marco do modelo inclusivo e de atención á diversidade da Consellería de Educación.\n\n`;
+      text += `📊 **Resumo de Participación e Dinámica na Aula:**\n`;
+      text += `• Rexistros analizados: ${total} sesións.\n`;
+      text += `• Nivel medio de enerxía e disposición: ${energyAvg} de 5.\n\n`;
+
+      if (positiveMoments.length > 0) {
+        text += `🌟 **Aspectos Positivos e Avances Observados:**\n`;
+        positiveMoments.forEach(m => { text += `• ${m}\n`; });
+        text += `\n`;
+      }
+
+      if (observations.length > 0) {
+        text += `📝 **Observacións Pedagóxicas e Estratexias:**\n`;
+        observations.forEach(o => { text += `• ${o}\n`; });
+        text += `\n`;
+      }
+
+      text += `🤝 **Orientacións para a colaboración coa familia:**\nContinuamos traballando na aula o reforzo positivo e a autorregulación emocional. Agradecemos o voso apoio continuo dende o fogar para manter unha liña de intervención coherente e favorecedora do seu desenvolvemento pedagóxico e benestar integral.\n\nAtentamente,\nO equipo docente.`;
+
+      document.getElementById('report-title').textContent = `Informe Semanal - Alumno/a ${student}`;
+      document.getElementById('report-subtitle').textContent = `Data de xeración: ${new Date().toLocaleDateString('gl-ES')}`;
+      document.getElementById('report-body').innerText = text;
+      document.getElementById('report-output-card').classList.remove('hidden');
+    }
+
+    function copyReport() {
+      const body = document.getElementById('report-body').innerText;
+      navigator.clipboard.writeText(body);
+      showToast('📋 Informe copiado ao portapapeis');
     }
 
     document.addEventListener("DOMContentLoaded", () => {
