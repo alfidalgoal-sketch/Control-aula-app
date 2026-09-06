@@ -1,71 +1,19 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ControlAula v.25 - Acceso Seguro</title>
-  <script src="<script>
-  // 1. PRIMERO: Declarar credenciales e inicializar el cliente
-  const SUPABASE_URL = "https://gnzqvwmwvsfjjwvzqcjy.supabase.co"; // Tu URL real
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImduenF2d213dnNmamp3dnpxY2p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3Mjc5MjksImV4cCI6MjA5MTMwMzkyOX0.VVY85EnMX5rILMiPJcxhUI537ZFfT1ppu1zAhFGtqgE"; // Tu clave anon real
 
-  // Se declara e inicializa la variable global ANTES de usarla
-  const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // 2. SEGUNDO: Declarar las funciones que usan _supabase
-  async function checkAuth() {
-    const { data: { session } } = await _supabase.auth.getSession();
-    if (session && session.user) {
-      document.getElementById("auth-gate").style.display = "none";
-      document.getElementById("app").classList.remove("hidden");
-    } else {
-      document.getElementById("auth-gate").style.display = "flex";
-      document.getElementById("app").classList.add("hidden");
-    }
-  }
-
-  async function handleAuth(e) {
-    e.preventDefault();
-    const email = document.getElementById("auth-email").value.trim().toLowerCase();
-    const password = document.getElementById("auth-password").value;
-    const errBox = document.getElementById("auth-error");
-    const btn = document.getElementById("btn-login");
-
-    errBox.classList.add("hidden");
-    btn.disabled = true;
-    btn.textContent = "Verificando en Supabase...";
-
-    try {
-      const { data, error } = await _supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-
-      if (error) {
-        errBox.textContent = "⛔ " + (error.message === "Invalid login credentials" ? "Correo o contraseña incorrectos." : error.message);
-        errBox.classList.remove("hidden");
-        btn.disabled = false;
-        btn.textContent = "Acceder al Panel →";
-      } else {
-        btn.disabled = false;
-        btn.textContent = "Acceder al Panel →";
-        checkAuth();
-      }
-    } catch (err) {
-      errBox.textContent = "❌ Error de conexión: " + err.message;
-      errBox.classList.remove("hidden");
-      btn.disabled = false;
-      btn.textContent = "Acceder al Panel →";
-    }
-  }
-
-  // 3. TERCERO: Ejecutar la verificación al cargar la página
-  checkAuth();
-</script>"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <!-- SDK Oficial de Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- 1. Estilos Tailwind CSS e Tipografía -->
+  <script src="https://gnzqvwmwvsfjjwvzqcjy.supabase.co"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- 2. Carga de Librarías Externas (Iconas e SDK de Supabase) -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- 3. Estilos CSS Personalizados -->
   <style>
     * { box-sizing: border-box; }
     body { font-family: 'DM Sans', sans-serif; margin: 0; }
@@ -89,6 +37,71 @@
     .record-card { transition: all 0.2s; }
     .record-card:hover { transform: translateY(-2px); }
   </style>
+
+  <!-- 4. Lóxica JavaScript e Conexión a Supabase -->
+  <script>
+    // Inserir aquí as claves reais de Supabase (Project Settings -> API)
+    const SUPABASE_URL = "https://gnzqvwmwvsfjjwvzqcjy.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImduenF2d213dnNmamp3dnpxY2p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3Mjc5MjksImV4cCI6MjA5MTMwMzkyOX0.VVY85EnMX5rILMiPJcxhUI537ZFfT1ppu1zAhFGtqgE";
+
+    // Inicialización correcta despois de cargar a biblioteca supabase-js
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function checkAuth() {
+      try {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (session && session.user) {
+          document.getElementById("auth-gate").style.display = "none";
+          document.getElementById("app").classList.remove("hidden");
+        } else {
+          document.getElementById("auth-gate").style.display = "flex";
+          document.getElementById("app").classList.add("hidden");
+        }
+      } catch (err) {
+        console.error("Erro en checkAuth:", err);
+      }
+    }
+
+    async function handleAuth(e) {
+      e.preventDefault();
+      const email = document.getElementById("auth-email").value.trim().toLowerCase();
+      const password = document.getElementById("auth-password").value;
+      const errBox = document.getElementById("auth-error");
+      const btn = document.getElementById("btn-login");
+
+      errBox.classList.add("hidden");
+      btn.disabled = true;
+      btn.textContent = "Verificando en Supabase...";
+
+      try {
+        const { data, error } = await _supabase.auth.signInWithPassword({
+          email: alfidalgo.al@gmail.com,
+          password: Aula2026
+        });
+
+        if (error) {
+          errBox.textContent = "⛔ " + (error.message === "Invalid login credentials" ? "Correo ou contrasinal incorrectos." : error.message);
+          errBox.classList.remove("hidden");
+          btn.disabled = false;
+          btn.textContent = "Acceder al Panel →";
+        } else {
+          btn.disabled = false;
+          btn.textContent = "Acceder al Panel →";
+          checkAuth();
+        }
+      } catch (err) {
+        errBox.textContent = "❌ Erro de conexión: " + err.message;
+        errBox.classList.remove("hidden");
+        btn.disabled = false;
+        btn.textContent = "Acceder al Panel →";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      checkAuth();
+      if (window.lucide) { lucide.createIcons(); }
+    });
+  </script>
 </head>
 <body class="h-full">
 
