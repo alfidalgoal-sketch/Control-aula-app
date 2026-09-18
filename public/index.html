@@ -4,16 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ControlAula v.25 - Acceso Seguro</title>
-
-  <!-- 1. Carga de Tailwind CSS e Tipografía -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
-
-  <!-- 2. Carga de Librarías Externas -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- 3. Estilos CSS Personalizados -->
   <style>
     * { box-sizing: border-box; }
     body { font-family: 'DM Sans', sans-serif; margin: 0; }
@@ -40,52 +34,73 @@
 </head>
 <body class="h-full">
 
-  <!-- PANTALLA DE ACCESO SEGURO -->
+  <!-- PANTALLA CAMBIAR CONTRASINAL (recovery link) -->
+  <div id="reset-gate" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden" style="background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl text-center fade-in">
+      <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4" style="background:#e8efe9;">
+        <i data-lucide="key-round" style="width:36px;height:36px;color:#2d6a4f;"></i>
+      </div>
+      <h2 class="font-display text-2xl font-bold mb-2" style="color:#1f2937;">Novo contrasinal</h2>
+      <p class="text-sm mb-6" style="color:#6b7280;">Introduce o teu novo contrasinal para acceder.</p>
+      <div class="space-y-4 text-left">
+        <div>
+          <label class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Novo contrasinal</label>
+          <input type="password" id="new-password" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" style="border-color:#d0ddd2;background:#f7faf8;">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Confirmar contrasinal</label>
+          <input type="password" id="new-password2" placeholder="Repite o contrasinal" class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" style="border-color:#d0ddd2;background:#f7faf8;">
+        </div>
+        <div id="reset-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200"></div>
+        <button onclick="doResetPassword()" class="w-full py-3.5 rounded-xl text-white font-semibold text-sm shadow-md" style="background:linear-gradient(135deg,#2d6a4f,#40916c);">
+          Gardar novo contrasinal
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA DE ACCESO -->
   <div id="auth-gate" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);">
     <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl text-center fade-in">
-      <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4" style="background: #e8efe9;">
+      <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4" style="background:#e8efe9;">
         <i data-lucide="shield-check" style="width:36px;height:36px;color:#2d6a4f;"></i>
       </div>
       <h2 class="font-display text-2xl font-bold mb-2" style="color:#1f2937;">ControlAula v.25</h2>
       <p class="text-sm mb-6" style="color:#6b7280;">Acceso exclusivo para docentes autorizados.</p>
-      
       <form onsubmit="handleAuth(event)" class="space-y-4 text-left">
         <div>
-          <label for="auth-email" class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Correo Electrónico</label>
-          <input type="email" id="auth-email" required placeholder="correo@dominio.com" class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" style="border-color:#d0ddd2; background:#f7faf8;">
+          <label class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Correo Electrónico</label>
+          <input type="email" id="auth-email" required placeholder="correo@dominio.com" class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" style="border-color:#d0ddd2;background:#f7faf8;">
         </div>
         <div>
-          <label for="auth-password" class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Contrasinal</label>
-          <input type="password" id="auth-password" required placeholder="••••••••" class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" style="border-color:#d0ddd2; background:#f7faf8;">
+          <label class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Contrasinal</label>
+          <input type="password" id="auth-password" required placeholder="••••••••" class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" style="border-color:#d0ddd2;background:#f7faf8;">
         </div>
-        
         <div id="auth-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200"></div>
-
-        <button type="submit" id="btn-login" class="w-full py-3.5 rounded-xl text-white font-semibold text-sm shadow-md transition hover:opacity-95 flex justify-center items-center gap-2" style="background: linear-gradient(135deg, #2d6a4f, #40916c);">
+        <button type="submit" id="btn-login" class="w-full py-3.5 rounded-xl text-white font-semibold text-sm shadow-md flex justify-center items-center gap-2" style="background:linear-gradient(135deg,#2d6a4f,#40916c);">
           <span>Acceder ao Panel</span> →
         </button>
       </form>
     </div>
   </div>
 
-  <!-- APLICACIÓN PRINCIPAL -->
-  <div id="app" class="h-full w-full overflow-auto hidden" style="background: #f0f4f1;">
-    
+  <!-- APP PRINCIPAL -->
+  <div id="app" class="h-full w-full overflow-auto hidden" style="background:#f0f4f1;">
     <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden">
-      <div class="toast-msg px-5 py-3 rounded-xl shadow-lg text-white font-medium text-sm" style="background: #2d6a4f;">
+      <div class="toast-msg px-5 py-3 rounded-xl shadow-lg text-white font-medium text-sm" style="background:#2d6a4f;">
         <span id="toast-text"></span>
       </div>
     </div>
-
-    <header class="px-5 pt-6 pb-4" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+    <header class="px-5 pt-6 pb-4" style="background:linear-gradient(135deg,#2d6a4f 0%,#40916c 100%);">
       <div class="max-w-2xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(255,255,255,0.2);">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2);">
             <i data-lucide="heart-handshake" style="width:22px;height:22px;color:#fff;"></i>
           </div>
           <div>
-            <h1 id="main-title" class="font-display text-xl font-bold text-white leading-tight">ControlAula v.25</h1>
-            <p id="student-display" class="text-sm" style="color: rgba(255,255,255,0.8);">Docente: <span id="user-email-tag" class="font-semibold text-white"></span> <span id="admin-badge" class="hidden ml-1 px-2 py-0.5 text-xs bg-amber-400 text-amber-950 font-bold rounded-full">Orientación (Admin)</span></p>
+            <h1 class="font-display text-xl font-bold text-white leading-tight">ControlAula v.25</h1>
+            <p class="text-sm" style="color:rgba(255,255,255,0.8);">Docente: <span id="user-email-tag" class="font-semibold text-white"></span>
+            <span id="admin-badge" class="hidden ml-1 px-2 py-0.5 text-xs bg-amber-400 text-amber-950 font-bold rounded-full">Orientación (Admin)</span></p>
           </div>
         </div>
         <button onclick="logout()" class="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition" title="Pechar sesión">
@@ -93,8 +108,7 @@
         </button>
       </div>
     </header>
-
-    <div class="sticky top-0 z-30 px-4 py-2" style="background: #e8efe9; border-bottom: 1px solid #d0ddd2;">
+    <div class="sticky top-0 z-30 px-4 py-2" style="background:#e8efe9;border-bottom:1px solid #d0ddd2;">
       <div class="max-w-2xl mx-auto flex gap-2">
         <button onclick="switchTab('form')" id="tab-form" class="tab-btn flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2" style="background:#2d6a4f;color:#fff;">
           <i data-lucide="clipboard-plus" style="width:16px;height:16px;"></i> Rexistrar
@@ -103,59 +117,46 @@
           <i data-lucide="history" style="width:16px;height:16px;"></i> Historial
         </button>
         <button onclick="switchTab('stats')" id="tab-stats" class="tab-btn flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2" style="background:transparent;color:#2d6a4f;">
-          <i data-lucide="file-text" style="width:16px;height:16px;"></i> Informe Semanal
+          <i data-lucide="file-text" style="width:16px;height:16px;"></i> Informe
         </button>
       </div>
     </div>
 
-    <!-- Form Tab -->
+    <!-- FORM TAB -->
     <div id="view-form" class="px-4 py-5 fade-in">
       <div class="max-w-2xl mx-auto space-y-4">
-        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff;border:1px solid #d0ddd2;">
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
-              <label for="inp-date" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">📅 Data</label>
-              <input type="date" id="inp-date" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
+              <label class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Data</label>
+              <input type="date" id="inp-date" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2;background:#f7faf8;">
             </div>
             <div>
-              <label for="inp-initials" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Iniciais alumno/a</label>
-              <input type="text" id="inp-initials" placeholder="ex. JM" maxlength="4" class="w-full rounded-xl border px-3 py-2.5 text-sm uppercase" style="border-color:#d0ddd2; background:#f7faf8;">
+              <label class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Iniciais alumno/a</label>
+              <input type="text" id="inp-initials" placeholder="ex. JM" maxlength="4" class="w-full rounded-xl border px-3 py-2.5 text-sm uppercase" style="border-color:#d0ddd2;background:#f7faf8;">
             </div>
             <div>
-              <label for="inp-course" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">📚 Curso</label>
-              <select id="inp-course" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
+              <label class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Curso</label>
+              <select id="inp-course" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2;background:#f7faf8;">
                 <option value="">Curso...</option>
                 <optgroup label="Educación Infantil">
-                  <option value="4º EI">4º EI</option>
-                  <option value="5º EI">5º EI</option>
-                  <option value="6º EI">6º EI</option>
+                  <option>4º EI</option><option>5º EI</option><option>6º EI</option>
                 </optgroup>
                 <optgroup label="Educación Primaria">
-                  <option value="1ºA EP">1ºA EP</option>
-                  <option value="1ºB EP">1ºB EP</option>
-                  <option value="2ºA EP">2ºA EP</option>
-                  <option value="2ºB EP">2ºB EP</option>
-                  <option value="3ºA EP">3ºA EP</option>
-                  <option value="3ºB EP">3ºB EP</option>
-                  <option value="4ºA EP">4ºA EP</option>
-                  <option value="4ºB EP">4ºB EP</option>
-                  <option value="5ºA EP">5ºA EP</option>
-                  <option value="5ºB EP">5ºB EP</option>
-                  <option value="6ºA EP">6ºA EP</option>
-                  <option value="6ºB EP">6ºB EP</option>
-                  <option value="6ºC EP">6ºC EP</option>
+                  <option>1ºA EP</option><option>1ºB EP</option><option>2ºA EP</option><option>2ºB EP</option>
+                  <option>3ºA EP</option><option>3ºB EP</option><option>4ºA EP</option><option>4ºB EP</option>
+                  <option>5ºA EP</option><option>5ºB EP</option><option>6ºA EP</option><option>6ºB EP</option><option>6ºC EP</option>
                 </optgroup>
               </select>
             </div>
             <div>
-              <label for="inp-teacher" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">👩‍🏫 Docente</label>
-              <input type="text" id="inp-teacher" placeholder="O teu nome" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
+              <label class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Docente</label>
+              <input type="text" id="inp-teacher" placeholder="O teu nome" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2;background:#f7faf8;">
             </div>
           </div>
         </div>
-
-        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <p id="mood-label" class="text-xs font-semibold mb-3" style="color:#2d6a4f;">Como se sentiu hoxe?</p>
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff;border:1px solid #d0ddd2;">
+          <p class="text-xs font-semibold mb-3" style="color:#2d6a4f;">Como se sentiu hoxe?</p>
           <div class="flex items-center justify-around">
             <button onclick="selectMood('muy_mal')" data-mood="muy_mal" class="mood-btn text-3xl p-1">😢</button>
             <button onclick="selectMood('mal')" data-mood="mal" class="mood-btn text-3xl p-1">😟</button>
@@ -164,119 +165,99 @@
             <button onclick="selectMood('muy_bien')" data-mood="muy_bien" class="mood-btn text-3xl p-1">😊</button>
           </div>
         </div>
-
-        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <p class="text-xs font-semibold mb-2" style="color:#2d6a4f;">⚡ Nivel de enerxía</p>
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff;border:1px solid #d0ddd2;">
+          <p class="text-xs font-semibold mb-2" style="color:#2d6a4f;">Nivel de enerxía</p>
           <div class="flex items-center gap-3">
             <span class="text-xs" style="color:#6b7280;">Baixo</span>
-            <input type="range" id="inp-energy" min="1" max="5" value="3" class="energy-slider flex-1" style="background: linear-gradient(90deg, #b7e4c7, #2d6a4f);">
+            <input type="range" id="inp-energy" min="1" max="5" value="3" class="energy-slider flex-1" style="background:linear-gradient(90deg,#b7e4c7,#2d6a4f);">
             <span class="text-xs" style="color:#6b7280;">Alto</span>
             <span id="energy-val" class="text-sm font-bold rounded-lg px-2 py-0.5" style="background:#e8efe9;color:#2d6a4f;">3</span>
           </div>
         </div>
-
-        <div class="card-enter rounded-2xl p-5 shadow-sm space-y-4" style="background:#fff; border: 1px solid #d0ddd2;">
+        <div class="card-enter rounded-2xl p-5 shadow-sm space-y-4" style="background:#fff;border:1px solid #d0ddd2;">
           <div class="flex items-center justify-between">
-            <span class="text-sm font-medium" style="color:#374151;">🙋 Participou na aula</span>
-            <div id="tog-participated" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('participated')">
-              <div class="toggle-thumb"></div>
-            </div>
+            <span class="text-sm font-medium" style="color:#374151;">Participou na aula</span>
+            <div id="tog-participated" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('participated')"><div class="toggle-thumb"></div></div>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-sm font-medium" style="color:#374151;">📏 Seguiu as normas</span>
-            <div id="tog-rules" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('rules')">
-              <div class="toggle-thumb"></div>
-            </div>
+            <span class="text-sm font-medium" style="color:#374151;">Seguiu as normas</span>
+            <div id="tog-rules" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('rules')"><div class="toggle-thumb"></div></div>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-sm font-medium" style="color:#374151;">🤝 Precisou apoio extra</span>
-            <div id="tog-support" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('support')">
-              <div class="toggle-thumb"></div>
-            </div>
+            <span class="text-sm font-medium" style="color:#374151;">Precisou apoio extra</span>
+            <div id="tog-support" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('support')"><div class="toggle-thumb"></div></div>
           </div>
         </div>
-
-        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <label for="inp-strategy" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">🧩 Estratexia utilizada</label>
-          <select id="inp-strategy" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2; background:#f7faf8;">
-            <option value="">Selecciona unha estratexia...</option>
-            <option value="tiempo_fuera">⏸ Tempo fóra / Pausa</option>
-            <option value="refuerzo_positivo">⭐ Reforzo positivo</option>
-            <option value="economía_fichas">🎯 Economía de fichas</option>
-            <option value="acompañamiento">🤝 Acompañamento individual</option>
-            <option value="adaptación_tarea">📝 Adaptación da tarefa</option>
-            <option value="cambio_actividad">🔄 Cambio de actividade</option>
-            <option value="relajación">🧘 Técnica de relaxación</option>
-            <option value="comunicación_familia">📞 Comunicación coa familia</option>
-            <option value="otra">💡 Outra</option>
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff;border:1px solid #d0ddd2;">
+          <label class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Estratexia utilizada</label>
+          <select id="inp-strategy" class="w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color:#d0ddd2;background:#f7faf8;">
+            <option value="">Selecciona...</option>
+            <option value="tiempo_fuera">Tempo fóra / Pausa</option>
+            <option value="refuerzo_positivo">Reforzo positivo</option>
+            <option value="economía_fichas">Economía de fichas</option>
+            <option value="acompañamiento">Acompañamento individual</option>
+            <option value="adaptación_tarea">Adaptación da tarefa</option>
+            <option value="cambio_actividad">Cambio de actividade</option>
+            <option value="relajación">Técnica de relaxación</option>
+            <option value="comunicación_familia">Comunicación coa familia</option>
+            <option value="otra">Outra</option>
           </select>
           <div class="mt-3 flex items-center gap-2">
             <span class="text-sm" style="color:#374151;">Funcionou?</span>
-            <div id="tog-strategy-worked" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('strategyWorked')">
-              <div class="toggle-thumb"></div>
-            </div>
+            <div id="tog-strategy-worked" class="toggle-track" style="background:#d1d5db;" onclick="toggleSwitch('strategyWorked')"><div class="toggle-thumb"></div></div>
           </div>
         </div>
-
-        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <label class="block text-xs font-semibold mb-3" style="color:#2d6a4f;">🎯 Condutas observadas</label>
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff;border:1px solid #d0ddd2;">
+          <label class="block text-xs font-semibold mb-3" style="color:#2d6a4f;">Condutas observadas</label>
           <div class="space-y-2" id="behavior-list">
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Agresividade / Violencia" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😠 Agresividade / Violencia</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Negatividade / Illamento" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😞 Negatividade / Illamento</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Impulsividade / Falta de control" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">⚡ Impulsividade / Falta de control</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Desatención / Distracción" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">👀 Desatención / Distracción</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Desobediencia / Desafío" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">🚫 Desobediencia / Desafío</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Ansiedade / Nervosismo" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">😰 Ansiedade / Nervosismo</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Boa conducta / Colaboración" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">✨ Boa conducta / Colaboración</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Agresividade / Violencia" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">Agresividade / Violencia</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Negatividade / Illamento" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">Negatividade / Illamento</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Impulsividade / Falta de control" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">Impulsividade / Falta de control</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Desatención / Distracción" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">Desatención / Distracción</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Desobediencia / Desafío" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">Desobediencia / Desafío</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Ansiedade / Nervosismo" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">Ansiedade / Nervosismo</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" data-behavior="Boa conducta / Colaboración" class="behavior-check w-4 h-4 rounded" style="accent-color:#2d6a4f;"> <span class="text-sm">Boa conducta / Colaboración</span></label>
           </div>
         </div>
-
-        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <label for="inp-obs" id="obs-label" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">📝 Observacións do docente</label>
-          <textarea id="inp-obs" rows="3" placeholder="Que ocorreu hoxe? Comportamento, incidencias..." class="w-full rounded-xl border px-3 py-2.5 text-sm resize-none" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff;border:1px solid #d0ddd2;">
+          <label class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Observacións do docente</label>
+          <textarea id="inp-obs" rows="3" placeholder="Que ocorreu hoxe? Comportamento, incidencias..." class="w-full rounded-xl border px-3 py-2.5 text-sm resize-none" style="border-color:#d0ddd2;background:#f7faf8;"></textarea>
         </div>
-
-        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <label for="inp-positive" class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">🌟 Momento positivo do día</label>
-          <textarea id="inp-positive" rows="2" placeholder="Algo bo que pasara hoxe..." class="w-full rounded-xl border px-3 py-2.5 text-sm resize-none" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff;border:1px solid #d0ddd2;">
+          <label class="block text-xs font-semibold mb-1.5" style="color:#2d6a4f;">Momento positivo do día</label>
+          <textarea id="inp-positive" rows="2" placeholder="Algo bo que pasou hoxe..." class="w-full rounded-xl border px-3 py-2.5 text-sm resize-none" style="border-color:#d0ddd2;background:#f7faf8;"></textarea>
         </div>
-
-        <button id="btn-submit" onclick="submitRecord()" class="w-full py-3.5 rounded-2xl text-white font-semibold text-sm shadow-md flex items-center justify-center gap-2" style="background: linear-gradient(135deg, #2d6a4f, #40916c);">
+        <button onclick="submitRecord()" class="w-full py-3.5 rounded-2xl text-white font-semibold text-sm shadow-md flex items-center justify-center gap-2" style="background:linear-gradient(135deg,#2d6a4f,#40916c);">
           <i data-lucide="save" style="width:18px;height:18px;"></i>
           <span id="btn-submit-text">Gardar rexistro</span>
         </button>
       </div>
     </div>
 
-    <!-- History Tab (Filtrado por usuario / Admin global) -->
+    <!-- HISTORY TAB -->
     <div id="view-history" class="px-4 py-5 hidden">
       <div class="max-w-2xl mx-auto">
         <div id="history-empty" class="text-center py-12 hidden">
           <div class="text-5xl mb-3">📋</div>
-          <p class="font-semibold" style="color:#2d6a4f;">Sen rexistros autorizados para amosar</p>
+          <p class="font-semibold" style="color:#2d6a4f;">Sen rexistros para amosar</p>
         </div>
         <div id="student-summary-list" class="space-y-4"></div>
       </div>
     </div>
 
-    <!-- Stats / Módulo Informe Semanal Reeditable e Personalizado -->
+    <!-- STATS TAB -->
     <div id="view-stats" class="px-4 py-5 hidden">
       <div class="max-w-2xl mx-auto space-y-4">
-        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff; border: 1px solid #d0ddd2;">
-          <h3 class="font-display font-bold text-lg mb-2" style="color:#2d6a4f;">📄 Xenerador de Informe Semanal Adaptado</h3>
-          <p class="text-xs text-gray-600 mb-4">Selecciona o alumno para xerar un borrador único e reeditábel antes do envío.</p>
-
+        <div class="card-enter rounded-2xl p-5 shadow-sm" style="background:#fff;border:1px solid #d0ddd2;">
+          <h3 class="font-display font-bold text-lg mb-2" style="color:#2d6a4f;">Xenerador de Informe Semanal</h3>
           <div class="mb-4">
             <label class="block text-xs font-semibold mb-1" style="color:#2d6a4f;">Alumno/a e Curso</label>
-            <select id="report-student" class="w-full rounded-xl border px-3 py-2 text-sm" style="border-color:#d0ddd2; background:#f7faf8;"></select>
+            <select id="report-student" class="w-full rounded-xl border px-3 py-2 text-sm" style="border-color:#d0ddd2;background:#f7faf8;"></select>
           </div>
-
-          <button onclick="generateWeeklyReport()" class="w-full py-3 rounded-xl text-white font-semibold text-sm flex justify-center items-center gap-2" style="background: linear-gradient(135deg, #2d6a4f, #40916c);">
-            <i data-lucide="sparkles" style="width:16px;height:16px;"></i> Xerar Borrador Personalizado
+          <button onclick="generateWeeklyReport()" class="w-full py-3 rounded-xl text-white font-semibold text-sm flex justify-center items-center gap-2" style="background:linear-gradient(135deg,#2d6a4f,#40916c);">
+            Xerar Borrador
           </button>
         </div>
-
-        <!-- Vista Editable do Informe -->
         <div id="report-output-card" class="hidden card-enter rounded-2xl p-6 shadow-sm bg-white border border-emerald-200 space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
@@ -284,434 +265,359 @@
               <p class="text-xs text-emerald-700" id="report-subtitle"></p>
             </div>
             <button onclick="copyFullReport()" class="text-xs px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-medium hover:bg-emerald-800 flex items-center gap-1">
-              <i data-lucide="copy" style="width:14px;height:14px;"></i> Copiar Informe
+              Copiar Informe
             </button>
           </div>
-
           <div>
             <label class="block text-xs font-semibold text-gray-700 mb-1">Encabezado e Resumo:</label>
-            <textarea id="edit-header" rows="4" class="w-full rounded-xl border p-3 text-sm" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
+            <textarea id="edit-header" rows="4" class="w-full rounded-xl border p-3 text-sm" style="border-color:#d0ddd2;background:#f7faf8;"></textarea>
           </div>
-
           <div id="block-behaviors" class="hidden">
-            <label class="block text-xs font-semibold text-gray-700 mb-1">🎯 Condutas Observadas (Cronolóxico Descendente):</label>
-            <textarea id="edit-behaviors" rows="4" class="w-full rounded-xl border p-3 text-sm" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Condutas Observadas:</label>
+            <textarea id="edit-behaviors" rows="4" class="w-full rounded-xl border p-3 text-sm" style="border-color:#d0ddd2;background:#f7faf8;"></textarea>
           </div>
-
           <div id="block-positives" class="hidden">
-            <label class="block text-xs font-semibold text-gray-700 mb-1">🌟 Aspectos Positivos e Avances:</label>
-            <textarea id="edit-positives" rows="3" class="w-full rounded-xl border p-3 text-sm" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Aspectos Positivos:</label>
+            <textarea id="edit-positives" rows="3" class="w-full rounded-xl border p-3 text-sm" style="border-color:#d0ddd2;background:#f7faf8;"></textarea>
           </div>
-
           <div id="block-obs" class="hidden">
-            <label class="block text-xs font-semibold text-gray-700 mb-1">📝 Observacións Pedagóxicas:</label>
-            <textarea id="edit-obs" rows="4" class="w-full rounded-xl border p-3 text-sm" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Observacións Pedagóxicas:</label>
+            <textarea id="edit-obs" rows="4" class="w-full rounded-xl border p-3 text-sm" style="border-color:#d0ddd2;background:#f7faf8;"></textarea>
           </div>
-
           <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-1">🤝 Cierre e Orientacións para a Familia:</label>
-            <textarea id="edit-footer" rows="4" class="w-full rounded-xl border p-3 text-sm" style="border-color:#d0ddd2; background:#f7faf8;"></textarea>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Cierre e Orientacións para a Familia:</label>
+            <textarea id="edit-footer" rows="4" class="w-full rounded-xl border p-3 text-sm" style="border-color:#d0ddd2;background:#f7faf8;"></textarea>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 
   <script>
-    // -------------------------------------------------------------
-    // CONFIGURACIÓN DE SUPABASE E ROL DE ADMINISTRADORA
-    // -------------------------------------------------------------
     const SUPABASE_URL = "https://gnzqvwmwvsfjjwvzqcjy.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImduenF2d213dnNmamp3dnpxY2p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3Mjc5MjksImV4cCI6MjA5MTMwMzkyOX0.VVY85EnMX5rILMiPJcxhUI537ZFfT1ppu1zAhFGtqgE";
     const ADMIN_EMAIL = "alfidalgo.al@gmail.com";
-    
-    let _supabase;
-    if (window.supabase) {
-      _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
 
-    const RECORDS_KEY = "controlaula_records_local";
+    let _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let allRecords = [];
     let currentUser = null;
     let isAdmin = false;
-    let selectedMood = '';
+    let selectedMood = "";
     let toggles = { participated: false, rules: false, support: false, strategyWorked: false };
     let selectedBehaviors = new Set();
-    const moodMap = { muy_mal: '😢 Moido mal', mal: '😟 Mal', regular: '😐 Regular', bien: '🙂 Ben', muy_bien: '😊 Moi ben' };
-    const moodEmoji = { muy_mal: '😢', mal: '😟', regular: '😐', bien: '🙂', muy_bien: '😊' };
+    const moodMap = { muy_mal:"😢 Moi mal", mal:"😟 Mal", regular:"😐 Regular", bien:"🙂 Ben", muy_bien:"😊 Moi ben" };
+    const moodEmoji = { muy_mal:"😢", mal:"😟", regular:"😐", bien:"🙂", muy_bien:"😊" };
 
+    // ── DETECCIÓN DO ENLACE DE RECOVERY ──────────────────────────
+    async function checkRecoveryLink() {
+      // Supabase pon #access_token=... na URL cando é un enlace de recovery
+      const hash = window.location.hash;
+      if (hash && hash.includes("type=recovery")) {
+        // Ocultar todo e mostrar formulario de novo contrasinal
+        document.getElementById("auth-gate").style.display = "none";
+        document.getElementById("reset-gate").classList.remove("hidden");
+        // Deixar que Supabase procese o hash automaticamente
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+          // Tentar recuperar do hash
+          await _supabase.auth.refreshSession();
+        }
+        if (window.lucide) lucide.createIcons();
+        return true;
+      }
+      return false;
+    }
+
+    async function doResetPassword() {
+      const p1 = document.getElementById("new-password").value;
+      const p2 = document.getElementById("new-password2").value;
+      const err = document.getElementById("reset-error");
+      err.classList.add("hidden");
+      if (p1.length < 6) { err.textContent = "O contrasinal debe ter polo menos 6 caracteres."; err.classList.remove("hidden"); return; }
+      if (p1 !== p2) { err.textContent = "Os contrasinais non coinciden."; err.classList.remove("hidden"); return; }
+      const { error } = await _supabase.auth.updateUser({ password: p1 });
+      if (error) { err.textContent = "Erro: " + error.message; err.classList.remove("hidden"); return; }
+      // Limpar o hash da URL
+      window.history.replaceState(null, "", window.location.pathname);
+      document.getElementById("reset-gate").classList.add("hidden");
+      showToast("✅ Contrasinal cambiado! Podes acceder agora.");
+      document.getElementById("auth-gate").style.display = "flex";
+    }
+
+    // ── AUTH ──────────────────────────────────────────────────────
     async function checkAuth() {
-      if (!_supabase) return;
+      const isRecovery = await checkRecoveryLink();
+      if (isRecovery) return;
       try {
         const { data: { session } } = await _supabase.auth.getSession();
         if (session && session.user) {
           currentUser = session.user;
           isAdmin = currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-
           document.getElementById("auth-gate").style.display = "none";
           document.getElementById("app").classList.remove("hidden");
           document.getElementById("user-email-tag").textContent = currentUser.email;
-          document.getElementById("inp-teacher").value = currentUser.email.split('@')[0];
-
-          if (isAdmin) {
-            document.getElementById("admin-badge").classList.remove("hidden");
-          } else {
-            document.getElementById("admin-badge").classList.add("hidden");
-          }
-
-          loadLocalData();
+          document.getElementById("inp-teacher").value = currentUser.email.split("@")[0];
+          if (isAdmin) document.getElementById("admin-badge").classList.remove("hidden");
+          await loadData();
         } else {
           document.getElementById("auth-gate").style.display = "flex";
           document.getElementById("app").classList.add("hidden");
         }
-      } catch (err) {
-        console.error("Erro ao comprobar a sesión:", err);
-      }
+      } catch(e) { console.error(e); }
     }
 
     async function handleAuth(e) {
       e.preventDefault();
-      if (!_supabase) return;
-
       const email = document.getElementById("auth-email").value.trim().toLowerCase();
       const password = document.getElementById("auth-password").value;
       const errBox = document.getElementById("auth-error");
       const btn = document.getElementById("btn-login");
-
       errBox.classList.add("hidden");
-      btn.disabled = true;
-      btn.innerHTML = "Verificando en Supabase...";
-
-      try {
-        const { data, error } = await _supabase.auth.signInWithPassword({
-          email: email,
-          password: password
-        });
-
-        if (error) {
-          errBox.textContent = "⛔ Acceso denegado: " + (error.message === "Invalid login credentials" ? "Correo ou contrasinal incorrectos." : error.message);
-          errBox.classList.remove("hidden");
-          btn.disabled = false;
-          btn.innerHTML = "<span>Acceder ao Panel</span> →";
-        } else {
-          btn.disabled = false;
-          btn.innerHTML = "<span>Acceder ao Panel</span> →";
-          checkAuth();
-        }
-      } catch (err) {
-        errBox.textContent = "❌ Erro de conexión: " + err.message;
+      btn.disabled = true; btn.innerHTML = "Verificando...";
+      const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        errBox.textContent = "Correo ou contrasinal incorrectos.";
         errBox.classList.remove("hidden");
-        btn.disabled = false;
-        btn.innerHTML = "<span>Acceder ao Panel</span> →";
+      } else {
+        await checkAuth();
       }
+      btn.disabled = false; btn.innerHTML = "<span>Acceder ao Panel</span> →";
     }
 
     async function logout() {
-      if (_supabase) await _supabase.auth.signOut();
-      checkAuth();
+      await _supabase.auth.signOut();
+      currentUser = null; isAdmin = false; allRecords = [];
+      document.getElementById("app").classList.add("hidden");
+      document.getElementById("auth-gate").style.display = "flex";
     }
 
-    function loadLocalData() {
-      try { 
-        const raw = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
-        // Filtro de seguridade: Ti (Admin) ves todo. O resto de usuarios ven só os seus rexistros.
-        if (isAdmin) {
-          allRecords = raw;
-        } else if (currentUser) {
-          allRecords = raw.filter(r => r.user_email === currentUser.email);
-        } else {
-          allRecords = [];
-        }
-      } catch { 
-        allRecords = []; 
-      }
+    // ── DATOS EN SUPABASE ─────────────────────────────────────────
+    async function loadData() {
+      if (!currentUser) return;
+      const { data, error } = await _supabase
+        .from("rexistros")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) { console.error("Erro cargando datos:", error); allRecords = []; }
+      else { allRecords = data || []; }
       renderHistoryGrouped();
       populateStudentSelect();
     }
 
-    function saveLocalData() {
-      // Cargamos todo o historial almacenado e actualizamos a nosa parte
-      try {
-        let globalData = JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
-        if (isAdmin) {
-          globalData = allRecords;
-        } else {
-          // Mantemos os rexistros doutros usuarios e substituímos os do usuario actual
-          const others = globalData.filter(r => r.user_email !== currentUser.email);
-          globalData = [...allRecords, ...others];
-        }
-        localStorage.setItem(RECORDS_KEY, JSON.stringify(globalData));
-      } catch {
-        localStorage.setItem(RECORDS_KEY, JSON.stringify(allRecords));
+    async function saveRecord(record) {
+      const { error } = await _supabase.from("rexistros").insert([record]);
+      if (error) {
+        showToast("Erro ao gardar: " + error.message);
+        return false;
       }
-      renderHistoryGrouped();
-      populateStudentSelect();
+      return true;
     }
 
-    function selectMood(m) { selectedMood = m; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('selected', b.dataset.mood === m)); }
-    function toggleSwitch(k) { toggles[k] = !toggles[k]; const el = document.getElementById({ participated: 'tog-participated', rules: 'tog-rules', support: 'tog-support', strategyWorked: 'tog-strategy-worked' }[k]); if (toggles[k]) { el.classList.add('on'); el.style.background = '#2d6a4f'; } else { el.classList.remove('on'); el.style.background = '#d1d5db'; } }
+    async function deleteRecordDB(id) {
+      const { error } = await _supabase.from("rexistros").delete().eq("id", id);
+      if (error) { showToast("Erro ao eliminar"); return; }
+      allRecords = allRecords.filter(r => r.id !== id);
+      renderHistoryGrouped();
+      showToast("Rexistro eliminado");
+    }
+
+    // ── FORM ──────────────────────────────────────────────────────
+    function selectMood(m) {
+      selectedMood = m;
+      document.querySelectorAll(".mood-btn").forEach(b => b.classList.toggle("selected", b.dataset.mood === m));
+    }
+
+    function toggleSwitch(k) {
+      toggles[k] = !toggles[k];
+      const ids = { participated:"tog-participated", rules:"tog-rules", support:"tog-support", strategyWorked:"tog-strategy-worked" };
+      const el = document.getElementById(ids[k]);
+      if (toggles[k]) { el.classList.add("on"); el.style.background = "#2d6a4f"; }
+      else { el.classList.remove("on"); el.style.background = "#d1d5db"; }
+    }
 
     function switchTab(t) {
-      ['form', 'history', 'stats'].forEach(v => {
-        const view = document.getElementById(`view-${v}`);
-        const tabBtn = document.getElementById(`tab-${v}`);
-        if (v === t) { view.classList.remove('hidden'); tabBtn.style.background = '#2d6a4f'; tabBtn.style.color = '#fff'; }
-        else { view.classList.add('hidden'); tabBtn.style.background = 'transparent'; tabBtn.style.color = '#2d6a4f'; }
+      ["form","history","stats"].forEach(v => {
+        const view = document.getElementById("view-" + v);
+        const btn = document.getElementById("tab-" + v);
+        if (v === t) { view.classList.remove("hidden"); btn.style.background = "#2d6a4f"; btn.style.color = "#fff"; }
+        else { view.classList.add("hidden"); btn.style.background = "transparent"; btn.style.color = "#2d6a4f"; }
       });
     }
 
     async function submitRecord() {
-      const initials = document.getElementById('inp-initials').value.trim().toUpperCase();
-      const course = document.getElementById('inp-course').value;
-      
-      if (!initials) { showToast('Introduce as iniciais do alumno/a'); return; }
-      if (!course) { showToast('Selecciona o curso'); return; }
-      if (!selectedMood) { showToast('Selecciona un estado emocional'); return; }
-      const date = document.getElementById('inp-date').value;
-      if (!date) { showToast('Selecciona unha data'); return; }
+      const initials = document.getElementById("inp-initials").value.trim().toUpperCase();
+      const course = document.getElementById("inp-course").value;
+      const date = document.getElementById("inp-date").value;
+      if (!initials) { showToast("Introduce as iniciais do alumno/a"); return; }
+      if (!course) { showToast("Selecciona o curso"); return; }
+      if (!selectedMood) { showToast("Selecciona un estado emocional"); return; }
+      if (!date) { showToast("Selecciona unha data"); return; }
 
-      const fullStudentTag = `${initials} (${course})`;
+      const btn = document.getElementById("btn-submit-text");
+      btn.textContent = "Gardando...";
 
       const record = {
-        id: Date.now().toString(),
-        timestamp: new Date().toISOString(),
-        user_email: currentUser ? currentUser.email : 'docente',
+        user_id: currentUser.id,
+        user_email: currentUser.email,
         date: date,
-        student_initials: fullStudentTag,
-        teacher_name: document.getElementById('inp-teacher').value.trim(),
+        student_initials: initials + " (" + course + ")",
+        teacher_name: document.getElementById("inp-teacher").value.trim(),
         mood: selectedMood,
-        energy_level: parseInt(document.getElementById('inp-energy').value),
+        energy_level: parseInt(document.getElementById("inp-energy").value),
         participated: toggles.participated,
         followed_rules: toggles.rules,
         needed_support: toggles.support,
-        strategy_used: document.getElementById('inp-strategy').value,
+        strategy_used: document.getElementById("inp-strategy").value,
         strategy_worked: toggles.strategyWorked,
-        behaviors: Array.from(selectedBehaviors).join(', '),
-        observation: document.getElementById('inp-obs').value.trim(),
-        positive_moment: document.getElementById('inp-positive').value.trim()
+        behaviors: Array.from(selectedBehaviors).join(", "),
+        observation: document.getElementById("inp-obs").value.trim(),
+        positive_moment: document.getElementById("inp-positive").value.trim()
       };
 
-      allRecords.unshift(record);
-      saveLocalData();
-      showToast('✅ Rexistro gardado correctamente');
-      resetForm();
+      const ok = await saveRecord(record);
+      if (ok) {
+        showToast("Rexistro gardado!");
+        await loadData();
+        resetForm();
+      }
+      btn.textContent = "Gardar rexistro";
     }
 
     function resetForm() {
-      selectedMood = '';
-      selectedBehaviors.clear();
-      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
-      document.querySelectorAll('.behavior-check').forEach(cb => cb.checked = false);
-      document.getElementById('inp-initials').value = '';
-      document.getElementById('inp-course').value = '';
-      document.getElementById('inp-energy').value = 3;
-      document.getElementById('energy-val').textContent = '3';
-      document.getElementById('inp-strategy').value = '';
-      document.getElementById('inp-obs').value = '';
-      document.getElementById('inp-positive').value = '';
-      ['participated', 'rules', 'support', 'strategyWorked'].forEach(k => { toggles[k] = false; const el = document.getElementById({ participated: 'tog-participated', rules: 'tog-rules', support: 'tog-support', strategyWorked: 'tog-strategy-worked' }[k]); el.classList.remove('on'); el.style.background = '#d1d5db'; });
-      document.getElementById('inp-date').valueAsDate = new Date();
+      selectedMood = ""; selectedBehaviors.clear();
+      document.querySelectorAll(".mood-btn").forEach(b => b.classList.remove("selected"));
+      document.querySelectorAll(".behavior-check").forEach(cb => cb.checked = false);
+      ["inp-initials","inp-obs","inp-positive"].forEach(id => document.getElementById(id).value = "");
+      document.getElementById("inp-course").value = "";
+      document.getElementById("inp-energy").value = 3;
+      document.getElementById("energy-val").textContent = "3";
+      document.getElementById("inp-strategy").value = "";
+      document.getElementById("inp-date").valueAsDate = new Date();
+      ["participated","rules","support","strategyWorked"].forEach(k => {
+        toggles[k] = false;
+        const ids = { participated:"tog-participated", rules:"tog-rules", support:"tog-support", strategyWorked:"tog-strategy-worked" };
+        const el = document.getElementById(ids[k]);
+        el.classList.remove("on"); el.style.background = "#d1d5db";
+      });
     }
 
-    function showToast(msg) { const toast = document.getElementById('toast'); document.getElementById('toast-text').textContent = msg; toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 3000); }
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      document.getElementById("toast-text").textContent = msg;
+      t.classList.remove("hidden");
+      setTimeout(() => t.classList.add("hidden"), 3000);
+    }
 
     function renderHistoryGrouped() {
-      const container = document.getElementById('student-summary-list');
-      const empty = document.getElementById('history-empty');
-
-      if (allRecords.length === 0) {
-        empty.classList.remove('hidden');
-        container.innerHTML = '';
-        return;
-      }
-      empty.classList.add('hidden');
-
+      const container = document.getElementById("student-summary-list");
+      const empty = document.getElementById("history-empty");
+      if (!allRecords.length) { empty.classList.remove("hidden"); container.innerHTML = ""; return; }
+      empty.classList.add("hidden");
       const grouped = {};
-      allRecords.forEach(rec => {
-        const key = rec.student_initials || 'ALU';
-        if (!grouped[key]) grouped[key] = [];
-        grouped[key].push(rec);
+      allRecords.forEach(r => {
+        const k = r.student_initials || "ALU";
+        if (!grouped[k]) grouped[k] = [];
+        grouped[k].push(r);
       });
-
-      let html = '';
-      Object.keys(grouped).forEach(studentKey => {
-        const studentRecords = grouped[studentKey];
-        const lastRec = studentRecords[0];
-        const safeId = studentKey.replace(/[^a-zA-Z0-9]/g, '_');
-
-        html += `
-          <div class="rounded-2xl bg-white border border-emerald-200 overflow-hidden shadow-sm">
-            <div onclick="toggleStudentHistory('${safeId}')" class="p-4 cursor-pointer hover:bg-emerald-50/50 flex items-center justify-between transition">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-emerald-800 text-white font-bold flex items-center justify-center text-xs text-center p-1 leading-tight">
-                  ${studentKey}
-                </div>
-                <div>
-                  <p class="font-bold text-gray-800 text-sm">${studentKey} <span class="ml-2 text-xs font-normal text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">${studentRecords.length} rexistros</span></p>
-                  <p class="text-xs text-gray-500">Última entrada: <strong>${lastRec.date}</strong> · ${moodEmoji[lastRec.mood] || '😐'} Enerxía: ${lastRec.energy_level}/5</p>
-                </div>
+      let html = "";
+      Object.keys(grouped).forEach(sk => {
+        const recs = grouped[sk];
+        const last = recs[0];
+        const sid = sk.replace(/[^a-zA-Z0-9]/g,"_");
+        html += `<div class="rounded-2xl bg-white border border-emerald-200 overflow-hidden shadow-sm">
+          <div onclick="toggleStudentHistory('${sid}')" class="p-4 cursor-pointer hover:bg-emerald-50/50 flex items-center justify-between transition">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-emerald-800 text-white font-bold flex items-center justify-center text-xs text-center p-1 leading-tight">${sk}</div>
+              <div>
+                <p class="font-bold text-gray-800 text-sm">${sk} <span class="ml-2 text-xs font-normal text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">${recs.length} rexistros</span></p>
+                <p class="text-xs text-gray-500">Última: ${last.date} · ${moodEmoji[last.mood]||"😐"} Enerxía: ${last.energy_level}/5</p>
               </div>
-              <i data-lucide="chevron-down" id="icon-${safeId}" class="w-5 h-5 text-emerald-800 transition-transform"></i>
             </div>
-
-            <div id="details-${safeId}" class="hidden border-t border-gray-100 bg-gray-50/50 p-4 space-y-3">
-              <p class="text-xs font-semibold text-emerald-800 uppercase tracking-wider mb-2">Historial Completo do Alumno/a</p>
-              ${studentRecords.map(rec => `
-                <div class="bg-white p-3 rounded-xl border border-gray-200 text-xs space-y-1">
-                  <div class="flex items-center justify-between">
-                    <span class="font-bold text-gray-700">${rec.date} · Docente: ${rec.teacher_name} (${rec.user_email})</span>
-                    <button onclick="deleteRecord('${rec.id}')" class="text-red-500 hover:text-red-700 font-semibold">Eliminar</button>
-                  </div>
-                  <p><strong>Estado emocional:</strong> ${moodMap[rec.mood] || 'N/A'} · <strong>Enerxía:</strong> ${rec.energy_level}/5</p>
-                  ${rec.behaviors ? `<p class="text-xs text-amber-800 bg-amber-50 p-1.5 rounded border border-amber-200">🎯 <strong>Condutas:</strong> ${rec.behaviors}</p>` : ''}
-                  ${rec.observation ? `<p class="text-gray-600 bg-gray-50 p-2 rounded-lg border mt-1"><strong>Observación:</strong> ${rec.observation}</p>` : ''}
-                  ${rec.positive_moment ? `<p class="text-emerald-700 bg-emerald-50 p-2 rounded-lg border border-emerald-100">🌟 <strong>Momento positivo:</strong> ${rec.positive_moment}</p>` : ''}
-                </div>
-              `).join('')}
-            </div>
+            <span id="icon-${sid}" class="text-emerald-800 font-bold">▼</span>
           </div>
-        `;
+          <div id="details-${sid}" class="hidden border-t border-gray-100 bg-gray-50/50 p-4 space-y-3">
+            ${recs.map(r => `<div class="bg-white p-3 rounded-xl border border-gray-200 text-xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-gray-700">${r.date} · ${r.teacher_name} (${r.user_email})</span>
+                <button onclick="deleteRecordDB('${r.id}')" class="text-red-500 hover:text-red-700 font-semibold">Eliminar</button>
+              </div>
+              <p><strong>Estado:</strong> ${moodMap[r.mood]||"N/A"} · <strong>Enerxía:</strong> ${r.energy_level}/5</p>
+              ${r.behaviors ? `<p class="text-amber-800 bg-amber-50 p-1.5 rounded border border-amber-200"><strong>Condutas:</strong> ${r.behaviors}</p>` : ""}
+              ${r.observation ? `<p class="text-gray-600 bg-gray-50 p-2 rounded-lg border"><strong>Observación:</strong> ${r.observation}</p>` : ""}
+              ${r.positive_moment ? `<p class="text-emerald-700 bg-emerald-50 p-2 rounded-lg border border-emerald-100"><strong>Momento positivo:</strong> ${r.positive_moment}</p>` : ""}
+            </div>`).join("")}
+          </div>
+        </div>`;
       });
-
       container.innerHTML = html;
-      lucide.createIcons();
     }
 
-    function toggleStudentHistory(safeId) {
-      const el = document.getElementById(`details-${safeId}`);
-      const icon = document.getElementById(`icon-${safeId}`);
-      if (el.classList.contains('hidden')) {
-        el.classList.remove('hidden');
-        icon.style.transform = 'rotate(180deg)';
-      } else {
-        el.classList.add('hidden');
-        icon.style.transform = 'rotate(0deg)';
-      }
-    }
-
-    function deleteRecord(id) {
-      allRecords = allRecords.filter(r => r.id !== id);
-      saveLocalData();
-      showToast('Rexistro eliminado');
+    function toggleStudentHistory(sid) {
+      const el = document.getElementById("details-" + sid);
+      const icon = document.getElementById("icon-" + sid);
+      if (el.classList.contains("hidden")) { el.classList.remove("hidden"); icon.textContent = "▲"; }
+      else { el.classList.add("hidden"); icon.textContent = "▼"; }
     }
 
     function populateStudentSelect() {
-      const select = document.getElementById('report-student');
+      const sel = document.getElementById("report-student");
       const students = [...new Set(allRecords.map(r => r.student_initials))];
-      select.innerHTML = students.map(s => `<option value="${s}">${s}</option>`).join('');
+      sel.innerHTML = students.map(s => `<option value="${s}">${s}</option>`).join("");
     }
 
-    // INFORME DINÁMICO ADAPTADO
     function generateWeeklyReport() {
-      const student = document.getElementById('report-student').value;
-      if (!student) { showToast('Selecciona un alumno/a'); return; }
+      const student = document.getElementById("report-student").value;
+      if (!student) { showToast("Selecciona un alumno/a"); return; }
+      const recs = allRecords.filter(r => r.student_initials === student).sort((a,b) => new Date(b.date)-new Date(a.date));
+      if (!recs.length) { showToast("Sen datos para este alumno/a"); return; }
+      const avg = (recs.reduce((a,b)=>a+b.energy_level,0)/recs.length).toFixed(1);
+      const bhLines = recs.filter(r=>r.behaviors).map(r=>`• [${r.date}] ${r.behaviors}`);
+      const posLines = recs.filter(r=>r.positive_moment).map(r=>`• [${r.date}] ${r.positive_moment}`);
+      const obsLines = recs.filter(r=>r.observation).map(r=>`• [${r.date}] ${r.observation}`);
+      document.getElementById("edit-header").value = `Estimada familia,
 
-      const studentRecords = allRecords
-        .filter(r => r.student_initials === student)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
+Compartimos o informe de seguimento de ${student}.
 
-      if (studentRecords.length === 0) { showToast('Sen datos para este alumno/a'); return; }
-
-      const total = studentRecords.length;
-      const energyAvg = (studentRecords.reduce((a, b) => a + b.energy_level, 0) / total).toFixed(1);
-
-      const behaviorLines = [];
-      studentRecords.forEach(r => {
-        if (r.behaviors) {
-          behaviorLines.push(`• [${r.date}] ${r.behaviors}`);
-        }
-      });
-
-      const positiveLines = [];
-      studentRecords.forEach(r => {
-        if (r.positive_moment) {
-          positiveLines.push(`• [${r.date}] ${r.positive_moment}`);
-        }
-      });
-
-      const observationLines = [];
-      studentRecords.forEach(r => {
-        if (r.observation) {
-          observationLines.push(`• [${r.date}] ${r.observation}`);
-        }
-      });
-
-      // Saúdos dinámicos
-      const greetings = [
-        `Estimada familia,\n\nCompartimos o informe pedagóxico do seguimento de ${student}, elaborado no cadro do modelo inclusivo da Consellería de Educación.\n\n📊 Sesións analizadas: ${total} | Nivel medio de disposición: ${energyAvg}/5.`,
-        `Apreciada familia,\n\nA continuación remitimos o resumo de evolución e convivencia correspondente a ${student}.\n\n📊 Total de sesións rexistradas: ${total} | Disposición e enerxía media: ${energyAvg}/5.`
-      ];
-      const selectedGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-
-      document.getElementById('edit-header').value = selectedGreeting;
-
-      // Bloque Condutas
-      const bBlock = document.getElementById('block-behaviors');
-      if (behaviorLines.length > 0) {
-        document.getElementById('edit-behaviors').value = behaviorLines.join('\n');
-        bBlock.classList.remove('hidden');
-      } else {
-        bBlock.classList.add('hidden');
-      }
-
-      // Bloque Aspectos Positivos
-      const pBlock = document.getElementById('block-positives');
-      if (positiveLines.length > 0) {
-        document.getElementById('edit-positives').value = positiveLines.join('\n');
-        pBlock.classList.remove('hidden');
-      } else {
-        pBlock.classList.add('hidden');
-      }
-
-      // Bloque Observacións
-      const oBlock = document.getElementById('block-obs');
-      if (observationLines.length > 0) {
-        document.getElementById('edit-obs').value = observationLines.join('\n');
-        oBlock.classList.remove('hidden');
-      } else {
-        oBlock.classList.add('hidden');
-      }
-
-      document.getElementById('edit-footer').value = `🤝 Orientacións para a colaboración familia-escola:\nContinuamos traballando na aula o reforzo positivo e a autorregulación emocional. Agradecemos o voso apoio continuo para manter unha liña de intervención coherente e favorecedora do seu benestar integral.\n\nAtentamente,\nO equipo docente.`;
-
-      document.getElementById('report-title').textContent = `Informe Semanal - ${student}`;
-      document.getElementById('report-subtitle').textContent = `Xerado o: ${new Date().toLocaleDateString('gl-ES')}`;
-      document.getElementById('report-output-card').classList.remove('hidden');
+Sesións analizadas: ${recs.length} | Nivel medio de disposición: ${avg}/5.`;
+      const bBlock = document.getElementById("block-behaviors");
+      if (bhLines.length) { document.getElementById("edit-behaviors").value = bhLines.join("\n"); bBlock.classList.remove("hidden"); } else bBlock.classList.add("hidden");
+      const pBlock = document.getElementById("block-positives");
+      if (posLines.length) { document.getElementById("edit-positives").value = posLines.join("\n"); pBlock.classList.remove("hidden"); } else pBlock.classList.add("hidden");
+      const oBlock = document.getElementById("block-obs");
+      if (obsLines.length) { document.getElementById("edit-obs").value = obsLines.join("\n"); oBlock.classList.remove("hidden"); } else oBlock.classList.add("hidden");
+      document.getElementById("edit-footer").value = "Continuamos traballando no reforzo positivo e a autorregulación emocional. Agradecemos o voso apoio.\n\nAtentamente,\nO equipo docente.";
+      document.getElementById("report-title").textContent = "Informe Semanal - " + student;
+      document.getElementById("report-subtitle").textContent = "Xerado o: " + new Date().toLocaleDateString("gl-ES");
+      document.getElementById("report-output-card").classList.remove("hidden");
     }
 
     function copyFullReport() {
-      let fullText = document.getElementById('edit-header').value + '\n\n';
-
-      const bBlock = document.getElementById('block-behaviors');
-      if (!bBlock.classList.contains('hidden')) {
-        fullText += '🎯 CONDUTAS OBSERVADAS:\n' + document.getElementById('edit-behaviors').value + '\n\n';
-      }
-
-      const pBlock = document.getElementById('block-positives');
-      if (!pBlock.classList.contains('hidden')) {
-        fullText += '🌟 ASPECTOS POSITIVOS E AVANCES:\n' + document.getElementById('edit-positives').value + '\n\n';
-      }
-
-      const oBlock = document.getElementById('block-obs');
-      if (!oBlock.classList.contains('hidden')) {
-        fullText += '📝 OBSERVACIÓNS PEDAGÓXICAS:\n' + document.getElementById('edit-obs').value + '\n\n';
-      }
-
-      fullText += document.getElementById('edit-footer').value;
-
-      navigator.clipboard.writeText(fullText);
-      showToast('📋 Informe completo copiado ao portapapeis');
+      let txt = document.getElementById("edit-header").value + "\n\n";
+      if (!document.getElementById("block-behaviors").classList.contains("hidden")) txt += "CONDUTAS:\n" + document.getElementById("edit-behaviors").value + "\n\n";
+      if (!document.getElementById("block-positives").classList.contains("hidden")) txt += "ASPECTOS POSITIVOS:\n" + document.getElementById("edit-positives").value + "\n\n";
+      if (!document.getElementById("block-obs").classList.contains("hidden")) txt += "OBSERVACIÓNS:\n" + document.getElementById("edit-obs").value + "\n\n";
+      txt += document.getElementById("edit-footer").value;
+      navigator.clipboard.writeText(txt);
+      showToast("Informe copiado ao portapapeis");
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById('inp-date').valueAsDate = new Date();
-      document.getElementById('inp-energy').addEventListener('input', function() { document.getElementById('energy-val').textContent = this.value; });
-      document.querySelectorAll('.behavior-check').forEach(cb => { cb.addEventListener('change', function() { if (this.checked) selectedBehaviors.add(this.dataset.behavior); else selectedBehaviors.delete(this.dataset.behavior); }); });
-      
-      if (window.lucide) { lucide.createIcons(); }
+      document.getElementById("inp-date").valueAsDate = new Date();
+      document.getElementById("inp-energy").addEventListener("input", function() { document.getElementById("energy-val").textContent = this.value; });
+      document.querySelectorAll(".behavior-check").forEach(cb => {
+        cb.addEventListener("change", function() {
+          if (this.checked) selectedBehaviors.add(this.dataset.behavior);
+          else selectedBehaviors.delete(this.dataset.behavior);
+        });
+      });
+      if (window.lucide) lucide.createIcons();
       checkAuth();
     });
   </script>
+
+  <!-- PIE DE PÁXINA -->
+  <div class="text-center py-4 text-xs" style="color:#6b7280;">
+    © 2025 Alex Lago
+  </div>
 </body>
 </html>
