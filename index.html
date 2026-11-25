@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="gl" class="h-full">
 <head>
   <meta charset="UTF-8">
@@ -433,7 +433,7 @@
       if (!email) { err.textContent = "Introduce o teu correo."; err.classList.remove("hidden"); return; }
       btn.textContent = "Enviando..."; btn.disabled = true;
       const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + window.location.pathname
+        redirectTo: 'https://controlaula-app.pages.dev/'
       });
       if (error) {
         err.textContent = "Erro: " + error.message;
@@ -451,7 +451,7 @@
       btn.textContent = "Enviando..."; btn.disabled = true;
       const { error } = await _supabase.auth.signInWithOtp({
         email: email,
-        options: { emailRedirectTo: window.location.origin + window.location.pathname }
+        options: { emailRedirectTo: 'https://controlaula-app.pages.dev/' }
       });
       if (error) {
         alert("Erro: " + error.message);
@@ -635,7 +635,10 @@
             ${recs.map(r => `<div class="bg-white p-3 rounded-xl border border-gray-200 text-xs space-y-1">
               <div class="flex items-center justify-between">
                 <span class="font-bold text-gray-700">${r.date} · ${r.teacher_name} (${r.user_email})</span>
-                <button onclick="deleteRecordDB('${r.id}')" class="text-red-500 hover:text-red-700 font-semibold">Eliminar</button>
+                <div class="flex gap-2">
+                  <button onclick="openEditModal('${r.id}')" class="text-emerald-600 hover:text-emerald-800 font-semibold">Editar</button>
+                  <button onclick="deleteRecordDB('${r.id}')" class="text-red-500 hover:text-red-700 font-semibold">Eliminar</button>
+                </div>
               </div>
               <p><strong>Estado:</strong> ${moodMap[r.mood]||"N/A"} · <strong>Enerxía:</strong> ${r.energy_level}/5</p>
               ${r.behaviors ? `<p class="text-amber-800 bg-amber-50 p-1.5 rounded border border-amber-200"><strong>Condutas:</strong> ${r.behaviors}</p>` : ""}
@@ -709,11 +712,120 @@ Sesións analizadas: ${recs.length} | Nivel medio de disposición: ${avg}/5.`;
       if (window.lucide) lucide.createIcons();
       checkAuth();
     });
-  </script>
+  
+    // ── EDITAR REXISTRO ───────────────────────────────────────────
+    let editingRecordId = null;
+
+    function openEditModal(id) {
+      const r = allRecords.find(x => x.id === id);
+      if (!r) return;
+      editingRecordId = id;
+      document.getElementById("em-date").value = r.date || "";
+      document.getElementById("em-teacher").value = r.teacher_name || "";
+      document.getElementById("em-mood").value = r.mood || "neutral";
+      document.getElementById("em-energy").value = r.energy_level || 3;
+      document.getElementById("em-behaviors").value = r.behaviors || "";
+      document.getElementById("em-observation").value = r.observation || "";
+      document.getElementById("em-positive").value = r.positive_moment || "";
+      document.getElementById("em-error").classList.add("hidden");
+      document.getElementById("edit-modal").classList.remove("hidden");
+    }
+
+    function closeEditModal() {
+      document.getElementById("edit-modal").classList.add("hidden");
+      editingRecordId = null;
+    }
+
+    async function saveEditModal() {
+      if (!editingRecordId) return;
+      const btn = document.getElementById("em-save-btn");
+      const errEl = document.getElementById("em-error");
+      btn.textContent = "Gardando...";
+      btn.disabled = true;
+      errEl.classList.add("hidden");
+
+      const updates = {
+        date: document.getElementById("em-date").value,
+        teacher_name: document.getElementById("em-teacher").value.trim(),
+        mood: document.getElementById("em-mood").value,
+        energy_level: parseInt(document.getElementById("em-energy").value),
+        behaviors: document.getElementById("em-behaviors").value.trim(),
+        observation: document.getElementById("em-observation").value.trim(),
+        positive_moment: document.getElementById("em-positive").value.trim(),
+      };
+
+      const { error } = await _supabase.from("rexistros").update(updates).eq("id", editingRecordId);
+      if (error) {
+        errEl.textContent = "Erro ao gardar: " + error.message;
+        errEl.classList.remove("hidden");
+      } else {
+        // Actualizar en memoria
+        const idx = allRecords.findIndex(x => x.id === editingRecordId);
+        if (idx !== -1) allRecords[idx] = { ...allRecords[idx], ...updates };
+        renderHistoryGrouped();
+        closeEditModal();
+        showToast("Rexistro actualizado ✅");
+      }
+      btn.textContent = "Gardar cambios";
+      btn.disabled = false;
+    }
+
+</script>
 
   <!-- PIE DE PÁXINA -->
   <div class="text-center py-4 text-xs" style="color:#6b7280;">
     © 2025 Alex Lago
+  </div>
+
+  <!-- MODAL EDITAR REXISTRO -->
+  <div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden" style="background:rgba(0,0,0,0.5);">
+    <div class="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl max-h-screen overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-lg" style="color:#1f2937;">✏️ Editar rexistro</h3>
+        <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">×</button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-gray-600">Data</label>
+          <input type="date" id="em-date" class="w-full rounded-xl border px-3 py-2 text-sm" style="border-color:#d0ddd2;">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-gray-600">Mestre/a</label>
+          <input type="text" id="em-teacher" class="w-full rounded-xl border px-3 py-2 text-sm" style="border-color:#d0ddd2;">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-gray-600">Estado emocional</label>
+          <select id="em-mood" class="w-full rounded-xl border px-3 py-2 text-sm" style="border-color:#d0ddd2;">
+            <option value="great">😄 Moi ben</option>
+            <option value="good">🙂 Ben</option>
+            <option value="neutral">😐 Regular</option>
+            <option value="bad">😟 Mal</option>
+            <option value="terrible">😤 Moi mal</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-gray-600">Nivel de enerxía (1-5)</label>
+          <input type="number" id="em-energy" min="1" max="5" class="w-full rounded-xl border px-3 py-2 text-sm" style="border-color:#d0ddd2;">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-gray-600">Condutas</label>
+          <textarea id="em-behaviors" rows="2" class="w-full rounded-xl border px-3 py-2 text-sm" style="border-color:#d0ddd2;"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-gray-600">Observación</label>
+          <textarea id="em-observation" rows="2" class="w-full rounded-xl border px-3 py-2 text-sm" style="border-color:#d0ddd2;"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-gray-600">Momento positivo</label>
+          <textarea id="em-positive" rows="2" class="w-full rounded-xl border px-3 py-2 text-sm" style="border-color:#d0ddd2;"></textarea>
+        </div>
+        <div id="em-error" class="hidden text-xs text-red-600 bg-red-50 p-2 rounded-lg"></div>
+        <div class="flex gap-3 pt-2">
+          <button onclick="closeEditModal()" class="flex-1 py-2.5 rounded-xl border text-sm font-semibold text-gray-600" style="border-color:#d0ddd2;">Cancelar</button>
+          <button onclick="saveEditModal()" id="em-save-btn" class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white" style="background:#2d6a4f;">Gardar cambios</button>
+        </div>
+      </div>
+    </div>
   </div>
 </body>
 </html>
